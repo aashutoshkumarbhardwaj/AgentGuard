@@ -9,6 +9,8 @@ dependencies = [
     "fastapi>=0.141.1",
     "pydantic>=2.13.5",
     "python-dotenv>=1.2.3",
+    "torch>=2.14.0",
+    "transformers>=5.17.0",
 ]
 
 [dependency-groups]

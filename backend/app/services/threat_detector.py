@@ -1,3 +1,10 @@
+from transformers import pipeline
+
+
+# --------------------------------------------------
+# 1. Deterministic rule-based detection
+# --------------------------------------------------
+
 SUSPICIOUS_PATTERNS = [
     "ignore previous instructions",
     "ignore your instructions",
@@ -14,8 +21,37 @@ SUSPICIOUS_PATTERNS = [
 ]
 
 
+# --------------------------------------------------
+# 2. Hugging Face ML detector
+# --------------------------------------------------
+
+_ml_detector = None
+
+
+def get_ml_detector():
+    global _ml_detector
+
+    if _ml_detector is None:
+        print("[AgentGuard] Loading prompt injection ML model...")
+
+        _ml_detector = pipeline(
+            "text-classification",
+            model="protectai/deberta-v3-base-prompt-injection-v2",
+        )
+
+        print("[AgentGuard] ML detector loaded.")
+
+    return _ml_detector
+
+
+# --------------------------------------------------
+# 3. Hybrid detection
+# --------------------------------------------------
+
 def detect_prompt_injection(text: str):
     text_lower = text.lower()
+
+    # ---------- Rule detection ----------
 
     matches = [
         pattern
@@ -23,20 +59,87 @@ def detect_prompt_injection(text: str):
         if pattern in text_lower
     ]
 
-    if matches:
+    rule_detected = len(matches) > 0
+
+    rule_confidence = 0
+
+    if rule_detected:
+        rule_confidence = min(
+            60 + len(matches) * 10,
+            100
+        )
+
+    # ---------- ML detection ----------
+
+    ml_detected = False
+    ml_confidence = 0
+    ml_label = None
+
+    try:
+        detector = get_ml_detector()
+
+        result = detector(
+            text[:4000],
+            truncation=True
+        )[0]
+
+        ml_label = result["label"]
+        ml_confidence = round(
+            result["score"] * 100,
+            2
+        )
+
+        # The model's label names may vary.
+        # Treat injection/malicious labels as threats.
+        ml_detected = any(
+            keyword in ml_label.lower()
+            for keyword in [
+                "inject",
+                "malicious",
+                "attack",
+                "unsafe",
+            ]
+        )
+
+    except Exception as e:
+        print(
+            f"[AgentGuard] ML detector unavailable: {e}"
+        )
+
+    # --------------------------------------------------
+    # Combine both detectors
+    # --------------------------------------------------
+
+    detected = rule_detected or ml_detected
+
+    confidence = max(
+        rule_confidence,
+        ml_confidence if ml_detected else 0
+    )
+
+    if detected:
         return {
             "detected": True,
             "threat_type": "PROMPT_INJECTION",
-            "confidence": min(
-                60 + len(matches) * 10,
-                100
-            ),
-            "matches": matches
+            "confidence": confidence,
+            "matches": matches,
+            "detection_methods": {
+                "rules": rule_detected,
+                "ml": ml_detected,
+            },
+            "ml_label": ml_label,
+            "ml_confidence": ml_confidence,
         }
 
     return {
         "detected": False,
         "threat_type": None,
         "confidence": 0,
-        "matches": []
+        "matches": [],
+        "detection_methods": {
+            "rules": False,
+            "ml": False,
+        },
+        "ml_label": ml_label,
+        "ml_confidence": ml_confidence,
     }

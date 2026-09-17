@@ -1,37 +1,42 @@
-from uuid import uuid4
+import uuid
 from datetime import datetime
+from typing import List, Dict, Optional
 
-APPROVALS = {}
+# In-memory approval store (in production, use a database)
+_approvals: Dict[str, Dict] = {}
 
 
-def create_approval(request_data, decision):
-    approval_id = str(uuid4())
-
+def create_approval(request_data: Dict, decision: Dict) -> Dict:
+    """Create a new approval request."""
+    approval_id = str(uuid.uuid4())
+    
     approval = {
         "id": approval_id,
-        "created_at": datetime.utcnow().isoformat(),
         "status": "PENDING",
+        "created_at": datetime.utcnow().isoformat(),
         "request": request_data,
-        "decision": decision
+        "decision": decision,
+        "updated_at": datetime.utcnow().isoformat()
     }
-
-    APPROVALS[approval_id] = approval
-
+    
+    _approvals[approval_id] = approval
     return approval
 
 
-def get_approvals():
-    return list(APPROVALS.values())
+def get_approvals() -> List[Dict]:
+    """Get all approval requests."""
+    return list(_approvals.values())
 
 
-def get_approval(approval_id):
-    return APPROVALS.get(approval_id)
+def get_approval(approval_id: str) -> Optional[Dict]:
+    """Get a specific approval by ID."""
+    return _approvals.get(approval_id)
 
 
-def update_approval(approval_id, status):
-    if approval_id not in APPROVALS:
-        return None
-
-    APPROVALS[approval_id]["status"] = status
-
-    return APPROVALS[approval_id]
+def update_approval(approval_id: str, status: str) -> Optional[Dict]:
+    """Update approval status."""
+    if approval_id in _approvals:
+        _approvals[approval_id]["status"] = status
+        _approvals[approval_id]["updated_at"] = datetime.utcnow().isoformat()
+        return _approvals[approval_id]
+    return None

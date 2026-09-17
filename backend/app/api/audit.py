@@ -13,7 +13,9 @@ router = APIRouter(
 
 @router.get("")
 def audit_logs():
-    return get_audit_logs()
+    return {
+        "events": get_audit_logs()
+    }
 
 
 @router.get("/verify")

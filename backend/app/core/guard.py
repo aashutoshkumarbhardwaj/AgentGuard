@@ -3,7 +3,8 @@ from app.services.risk_engine import assess_risk
 from app.services.context_engine import analyze_context
 from app.security.cedar.engine import cedar_authorize
 from app.security.normalize import normalize_action
-from app.security.cedar.engine import cedar_authorize
+from app.core.agents import get_agent, can_use_tool
+
 
 def evaluate_action(
     tool: str,
@@ -14,11 +15,39 @@ def evaluate_action(
     user_id: str = "unknown-user",
     resource: str = "unknown-resource",
 ):
+    # Check if agent is registered
+    agent = get_agent(agent_id)
+    if not agent:
+        return {
+            "decision": "BLOCK",
+            "risk_level": "CRITICAL", 
+            "risk_score": 100,
+            "policy_id": "UNKNOWN_AGENT_001",
+            "reason": "Agent is not registered with AgentGuard.",
+            "factors": ["Unknown agent identity"],
+            "authorization": {
+                "cedar_allowed": False,
+                "agent_registered": False,
+            },
+        }
 
-    policy_key = normalize_action(
-        tool,
-        action
-    )
+    policy_key = normalize_action(tool, action)
+    
+    # Check if agent can use this tool
+    if not can_use_tool(agent_id, policy_key):
+        return {
+            "decision": "BLOCK",
+            "risk_level": "CRITICAL",
+            "risk_score": 100,
+            "policy_id": "AGENT_PERMISSION_001",
+            "reason": "Agent is not permitted to perform this action.",
+            "factors": [f"Agent {agent_id} is not authorized for {policy_key}"],
+            "authorization": {
+                "cedar_allowed": False,
+                "agent_registered": True,
+                "agent_permission": False,
+            },
+        }
 
     policy = POLICIES.get(policy_key)
 

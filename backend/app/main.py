@@ -4,6 +4,7 @@ from app.api.approvals import router as approval_router
 from app.api.simulation import router as simulation_router
 from app.api.audit import router as audit_router
 from app.api.authorize import router as authorize_router
+from app.api.agents import router as agents_router
 
 
 app = FastAPI(
@@ -16,7 +17,7 @@ app.include_router(approval_router)
 app.include_router(simulation_router)
 app.include_router(audit_router)
 app.include_router(authorize_router)
-
+app.include_router(agents_router)
 
 
 @app.get("/")
