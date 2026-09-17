@@ -3,7 +3,7 @@ from app.services.risk_engine import assess_risk
 from app.services.context_engine import analyze_context
 from app.security.cedar.engine import cedar_authorize
 from app.security.normalize import normalize_action
-
+from app.security.cedar.engine import cedar_authorize
 
 def evaluate_action(
     tool: str,
@@ -93,12 +93,12 @@ def evaluate_action(
             "Prompt injection detected by security layer"
         )
         if (
-            context_analysis["data_classification"]["highly_sensitive"]
+            context_analysis["data_classification"]["sensitive"]
         ):
-            score = 100
+            score = max(score, 100)
 
             factors.append(
-                "Highly sensitive data exposure"
+                "Sensitive data exposure"
             )
 
         if (
