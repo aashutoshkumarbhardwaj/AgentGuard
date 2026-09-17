@@ -83,18 +83,33 @@ def evaluate_action(
     # 4. Security escalation
     # --------------------------------------------------
 
-    if context_analysis["prompt_injection"]["detected"]:
+    prompt_injection_detected = (
+        context_analysis["prompt_injection"]["detected"]
+    )
+
+    if prompt_injection_detected:
         score = max(score, 90)
-
-    if (
-        context_analysis["data_classification"]["sensitive"]
-        and context.get("destination") == "external"
-    ):
-        score = max(score, 95)
-
         factors.append(
-            "Potential data exfiltration"
+            "Prompt injection detected by security layer"
         )
+        if (
+            context_analysis["data_classification"]["highly_sensitive"]
+        ):
+            score = 100
+
+            factors.append(
+                "Highly sensitive data exposure"
+            )
+
+        if (
+            context_analysis["data_classification"]["sensitive"]
+            and context.get("destination") == "external"
+        ):
+            score = max(score, 95)
+
+            factors.append(
+                "Potential data exfiltration"
+            )
 
     # Cedar denial is a hard security boundary.
     if not cedar_result["allowed"]:
@@ -129,6 +144,9 @@ def evaluate_action(
     decision = policy["decision"]
 
     if not cedar_result["allowed"]:
+        decision = "BLOCK"
+
+    elif prompt_injection_detected:
         decision = "BLOCK"
 
     elif risk_level == "CRITICAL":
