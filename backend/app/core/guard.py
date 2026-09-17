@@ -1,16 +1,24 @@
 from app.core.policies import POLICIES
 from app.services.risk_engine import assess_risk
 from app.services.context_engine import analyze_context
+from app.security.cedar.engine import cedar_authorize
+from app.security.normalize import normalize_action
 
 
 def evaluate_action(
     tool: str,
     action: str,
     arguments: dict,
-    context: dict
+    context: dict,
+    agent_id: str = "unknown-agent",
+    user_id: str = "unknown-user",
+    resource: str = "unknown-resource",
 ):
 
-    policy_key = f"{tool}.{action}"
+    policy_key = normalize_action(
+        tool,
+        action
+    )
 
     policy = POLICIES.get(policy_key)
 
@@ -20,15 +28,39 @@ def evaluate_action(
             "risk_level": "CRITICAL",
             "risk_score": 100,
             "policy_id": "DEFAULT_DENY_001",
-            "reason": "No policy exists for this action.",
-            "factors": ["Unknown action"]
+            "reason": "No AgentGuard policy exists for this action.",
+            "factors": ["Unknown action"],
+            "authorization": {
+                "cedar_allowed": False
+            }
         }
+
+    # --------------------------------------------------
+    # 1. Cedar authorization
+    # --------------------------------------------------
+
+    cedar_result = cedar_authorize(
+        principal_id=agent_id,
+        principal_type="Agent",
+        action=policy_key,
+        resource_id=resource or "unknown",
+        resource_type="Resource",
+        context=context,
+    )
+
+    # --------------------------------------------------
+    # 2. Risk analysis
+    # --------------------------------------------------
 
     risk = assess_risk(
         action,
         arguments,
         context
     )
+
+    # --------------------------------------------------
+    # 3. Context / threat analysis
+    # --------------------------------------------------
 
     context_analysis = analyze_context(
         action,
@@ -47,20 +79,16 @@ def evaluate_action(
         risk["score"]
     )
 
-    # Prompt injection automatically escalates risk
-    if context_analysis[
-        "prompt_injection"
-    ]["detected"]:
+    # --------------------------------------------------
+    # 4. Security escalation
+    # --------------------------------------------------
 
+    if context_analysis["prompt_injection"]["detected"]:
         score = max(score, 90)
 
-    # Sensitive data + external destination
     if (
-        context_analysis[
-            "data_classification"
-        ]["sensitive"]
-        and
-        context.get("destination") == "external"
+        context_analysis["data_classification"]["sensitive"]
+        and context.get("destination") == "external"
     ):
         score = max(score, 95)
 
@@ -68,20 +96,42 @@ def evaluate_action(
             "Potential data exfiltration"
         )
 
+    # Cedar denial is a hard security boundary.
+    if not cedar_result["allowed"]:
+        score = 100
+
+        factors.append(
+            "Cedar authorization denied"
+        )
+
     score = min(score, 100)
+
+    # --------------------------------------------------
+    # 5. Risk level
+    # --------------------------------------------------
 
     if score >= 90:
         risk_level = "CRITICAL"
+
     elif score >= 70:
         risk_level = "HIGH"
+
     elif score >= 40:
         risk_level = "MEDIUM"
+
     else:
         risk_level = "LOW"
 
+    # --------------------------------------------------
+    # 6. Final AgentGuard decision
+    # --------------------------------------------------
+
     decision = policy["decision"]
 
-    if risk_level == "CRITICAL":
+    if not cedar_result["allowed"]:
+        decision = "BLOCK"
+
+    elif risk_level == "CRITICAL":
         decision = "BLOCK"
 
     return {
@@ -91,12 +141,18 @@ def evaluate_action(
         "policy_id": policy["policy_id"],
         "reason": policy["reason"],
         "factors": list(set(factors)),
+
+        "authorization": {
+            "cedar_allowed": cedar_result["allowed"],
+            "cedar_decision": cedar_result["decision"],
+        },
+
         "security": {
             "prompt_injection": context_analysis[
                 "prompt_injection"
             ],
             "data_classification": context_analysis[
                 "data_classification"
-            ]
+            ],
         }
     }

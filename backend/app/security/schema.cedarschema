@@ -1,0 +1,66 @@
+// Cedar schema for AgentGuard security policies
+
+entity Agent {};
+
+entity Resource {};
+
+// Actions with context attributes defined
+action "calendar.read" appliesTo {
+    principal: [Agent],
+    resource: [Resource],
+    context: {},
+};
+
+action "calendar.write" appliesTo {
+    principal: [Agent],
+    resource: [Resource],
+    context: {},
+};
+
+action "email.send" appliesTo {
+    principal: [Agent],
+    resource: [Resource],
+    context: {
+        "destination": String,
+    },
+};
+
+action "email.read" appliesTo {
+    principal: [Agent],
+    resource: [Resource],
+    context: {},
+};
+
+action "file.read" appliesTo {
+    principal: [Agent],
+    resource: [Resource],
+    context: {},
+};
+
+action "file.modify" appliesTo {
+    principal: [Agent],
+    resource: [Resource],
+    context: {
+        "environment": String,
+    },
+};
+
+action "file.delete" appliesTo {
+    principal: [Agent],
+    resource: [Resource],
+    context: {},
+};
+
+action "credential.read" appliesTo {
+    principal: [Agent],
+    resource: [Resource],
+    context: {},
+};
+
+action "data.export" appliesTo {
+    principal: [Agent],
+    resource: [Resource],
+    context: {
+        "destination": String,
+    },
+};
