@@ -1,17 +1,14 @@
 import hashlib
 import json
 from datetime import datetime
-
-AUDIT_LOG = []
+from app.db.audit import insert_audit_log, get_all_audit_logs, get_last_audit_log
 
 
 def create_hash(data: dict):
-
     serialized = json.dumps(
         data,
         sort_keys=True
     )
-
     return hashlib.sha256(
         serialized.encode()
     ).hexdigest()
@@ -29,15 +26,14 @@ def record_event(
     reason: str,
     factors: list
 ):
-
+    last_event = get_last_audit_log()
     previous_hash = (
-        AUDIT_LOG[-1]["event_hash"]
-        if AUDIT_LOG
+        last_event["event_hash"]
+        if last_event
         else "GENESIS"
     )
 
     event = {
-        "event_id": len(AUDIT_LOG) + 1,
         "timestamp": datetime.utcnow().isoformat(),
         "agent_id": agent_id,
         "user_id": user_id,
@@ -54,21 +50,20 @@ def record_event(
 
     event["event_hash"] = create_hash(event)
 
-    AUDIT_LOG.append(event)
+    inserted_event = insert_audit_log(event)
 
-    return event
+    return inserted_event
 
 
 def get_audit_logs():
-    return AUDIT_LOG
+    return get_all_audit_logs()
 
 
 def verify_audit_chain():
-
+    audit_logs = get_all_audit_logs()
     previous_hash = "GENESIS"
 
-    for event in AUDIT_LOG:
-
+    for event in audit_logs:
         if event["previous_hash"] != previous_hash:
             return False
 
@@ -77,7 +72,7 @@ def verify_audit_chain():
         event_copy = {
             key: value
             for key, value in event.items()
-            if key != "event_hash"
+            if key not in ("event_hash", "event_id")
         }
 
         calculated_hash = create_hash(

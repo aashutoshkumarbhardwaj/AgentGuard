@@ -1,0 +1,13 @@
+.venv
+__pycache__
+.git
+.pytest_cache
+node_modules
+*.pyc
+*.pyo
+.idea/
+.vscode/
+agentguard.db
+sdk/python/build/
+sdk/python/dist/
+sdk/python/*.egg-info/

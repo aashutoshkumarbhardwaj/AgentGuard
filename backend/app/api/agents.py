@@ -1,11 +1,10 @@
 from fastapi import APIRouter, HTTPException
-
-from app.core.agents import (
-    AGENTS,
+from app.core.audit import record_event
+from app.db.agents import (
     get_agent,
-    can_use_tool,
-    get_registered_agents,
-    get_agent_details,
+    list_agents as get_registered_agents,
+    allow_permission,
+    deny_permission,
 )
 
 router = APIRouter(
@@ -23,7 +22,7 @@ def list_agents():
 
 @router.get("/{agent_id}")
 def agent_details(agent_id: str):
-    agent = get_agent_details(agent_id)
+    agent = get_agent(agent_id)
     if not agent:
         raise HTTPException(
             status_code=404,
@@ -34,7 +33,7 @@ def agent_details(agent_id: str):
 
 @router.get("/{agent_id}/permissions")
 def permissions(agent_id: str):
-    agent = get_agent_details(agent_id)
+    agent = get_agent(agent_id)
     if not agent:
         raise HTTPException(
             status_code=404,
@@ -58,8 +57,23 @@ def allow_permission_endpoint(
             detail="Agent not found",
         )
     
-    if action not in agent["allowed_tools"]:
-        agent["allowed_tools"].append(action)
+    agent = allow_permission(agent_id, action)
+
+    # Record audit event
+    record_event(
+        agent_id="admin",
+        user_id="system",
+        tool="agentguard",
+        action="permission.allow",
+        decision="ALLOW",
+        risk_level="LOW",
+        risk_score=0,
+        policy_id="PERMISSION_ADMIN",
+        reason=f"Permission granted: {action}",
+        factors=[
+            f"Target agent: {agent_id}",
+        ],
+    )
 
     return {
         "agent_id": agent_id,
@@ -81,8 +95,23 @@ def deny_permission_endpoint(
             detail="Agent not found",
         )
     
-    if action in agent["allowed_tools"]:
-        agent["allowed_tools"].remove(action)
+    agent = deny_permission(agent_id, action)
+
+    # Record audit event
+    record_event(
+        agent_id="admin",
+        user_id="system",
+        tool="agentguard",
+        action="permission.deny",
+        decision="BLOCK",
+        risk_level="LOW",
+        risk_score=0,
+        policy_id="PERMISSION_ADMIN",
+        reason=f"Permission revoked: {action}",
+        factors=[
+            f"Target agent: {agent_id}",
+        ],
+    )
 
     return {
         "agent_id": agent_id,

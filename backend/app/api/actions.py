@@ -18,7 +18,9 @@ def agent_action(request: ActionRequest):
         tool=request.tool,
         action=request.action,
         arguments=request.arguments,
-        context=request.context
+        context=request.context,
+        agent_id=request.agent_id,
+        user_id=request.user_id
     )
     record_event(
     agent_id=request.agent_id,

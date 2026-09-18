@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  agentguard-api:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - AGENTGUARD_DB=/data/agentguard.db
+      - AGENTGUARD_LOG_LEVEL=INFO
+    volumes:
+      - agentguard_data:/data
+
+  mcp-gateway:
+    build:
+      context: ./backend
+    # Run the MCP server in stdin/stdout mode natively inside the container
+    command: ["python", "-m", "app.mcp.mcp_server"]
+    stdin_open: true # Allows 'docker attach' to work
+    tty: true        # Required to keep stdin open properly
+    environment:
+      - AGENTGUARD_DB=/data/agentguard.db
+    volumes:
+      - agentguard_data:/data
+    depends_on:
+      - agentguard-api
+
+volumes:
+  agentguard_data:

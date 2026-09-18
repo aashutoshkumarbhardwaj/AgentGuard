@@ -2,13 +2,15 @@ import sqlite3
 from pathlib import Path
 
 
-DB_PATH = (
-    Path(__file__).resolve().parent.parent.parent
-    / "agentguard.db"
-)
+import os
+
+DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent.parent / "agentguard.db"
+DB_PATH = os.environ.get("AGENTGUARD_DB", str(DEFAULT_DB_PATH))
 
 
 def get_connection():
+    db_path_obj = Path(DB_PATH)
+    db_path_obj.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn

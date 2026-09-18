@@ -83,5 +83,8 @@ def authorize(request: AuthorizationRequest):
             "id": result["policy_id"]
         },
 
+        "authorization": result.get("authorization", {}),
+        "security": result.get("security", {}),
+
         "reason": result["reason"]
     }

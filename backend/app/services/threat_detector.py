@@ -1,3 +1,5 @@
+import re
+import sys
 from transformers import pipeline
 
 
@@ -32,14 +34,16 @@ def get_ml_detector():
     global _ml_detector
 
     if _ml_detector is None:
-        print("[AgentGuard] Loading prompt injection ML model...")
+        print("[AgentGuard] Loading prompt injection ML model...", file=sys.stderr)
 
         _ml_detector = pipeline(
             "text-classification",
             model="protectai/deberta-v3-base-prompt-injection-v2",
+            max_length=512,
+            truncation=True,
         )
 
-        print("[AgentGuard] ML detector loaded.")
+        print("[AgentGuard] ML detector loaded.", file=sys.stderr)
 
     return _ml_detector
 

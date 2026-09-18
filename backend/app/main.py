@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from app.db.agents import init_db, seed_agents
+from app.db.audit import init_audit_db
 from app.api.actions import router as action_router
 from app.api.approvals import router as approval_router
 from app.api.simulation import router as simulation_router
@@ -7,10 +10,19 @@ from app.api.authorize import router as authorize_router
 from app.api.agents import router as agents_router
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    seed_agents()
+    init_audit_db()
+    yield
+
+
 app = FastAPI(
     title="AgentGuard",
     description="Runtime security and governance layer for AI agents",
-    version="0.1.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 app.include_router(action_router)
 app.include_router(approval_router)
@@ -31,6 +43,19 @@ def root():
 
 @app.get("/health")
 def health():
+    try:
+        from app.db.agents import get_connection
+        conn = get_connection()
+        conn.execute("SELECT 1")
+        conn.close()
+        db_status = "online"
+    except Exception:
+        db_status = "offline"
+
     return {
-        "status": "healthy"
+        "status": "healthy" if db_status == "online" else "degraded",
+        "authorization_engine": "online",
+        "risk_engine": "online",
+        "threat_detector": "online",
+        "audit": db_status
     }

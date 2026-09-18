@@ -5,21 +5,21 @@ AGENTS: Dict[str, Dict] = {
     "research-agent": {
         "name": "Research Agent",
         "description": "Agent for researching information",
-        "allowed_tools": ["read_calendar", "send_internal_email", "read_files"],
+        "allowed_tools": ["calendar.read", "email.send_internal", "files.read"],
         "risk_level": "LOW",
         "max_risk_score": 50
     },
     "assistant-agent": {
         "name": "Assistant Agent", 
         "description": "General purpose assistant",
-        "allowed_tools": ["read_calendar", "send_internal_email"],
+        "allowed_tools": ["calendar.read", "email.send_internal"],
         "risk_level": "LOW",
         "max_risk_score": 30
     },
     "external-agent": {
         "name": "External Agent",
         "description": "Agent with external communication capabilities",
-        "allowed_tools": ["send_external_email", "read_files", "delete_files"],
+        "allowed_tools": ["email.send", "files.read", "files.delete"],
         "risk_level": "HIGH",
         "max_risk_score": 90
     }

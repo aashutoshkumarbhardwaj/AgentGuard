@@ -3,7 +3,7 @@ from app.services.risk_engine import assess_risk
 from app.services.context_engine import analyze_context
 from app.security.cedar.engine import cedar_authorize
 from app.security.normalize import normalize_action
-from app.core.agents import get_agent, can_use_tool
+from app.db.agents import get_agent, can_use_tool
 
 
 def evaluate_action(
@@ -121,24 +121,25 @@ def evaluate_action(
         factors.append(
             "Prompt injection detected by security layer"
         )
-        if (
-            context_analysis["data_classification"]["sensitive"]
-        ):
-            score = max(score, 100)
+        
+    if (
+        context_analysis["data_classification"]["sensitive"]
+    ):
+        score = max(score, 100)
 
-            factors.append(
-                "Sensitive data exposure"
-            )
+        factors.append(
+            "Sensitive data exposure"
+        )
 
-        if (
-            context_analysis["data_classification"]["sensitive"]
-            and context.get("destination") == "external"
-        ):
-            score = max(score, 95)
+    if (
+        context_analysis["data_classification"]["sensitive"]
+        and context.get("destination") == "external"
+    ):
+        score = max(score, 95)
 
-            factors.append(
-                "Potential data exfiltration"
-            )
+        factors.append(
+            "Potential data exfiltration"
+        )
 
     # Cedar denial is a hard security boundary.
     if not cedar_result["allowed"]:

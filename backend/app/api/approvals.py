@@ -60,6 +60,16 @@ def approve_approval(approval_id: str):
             detail="Approval is no longer pending"
         )
 
+    # Check expiration (24 hours)
+    from datetime import datetime, timedelta
+    created_at = datetime.fromisoformat(approval["created_at"])
+    if datetime.utcnow() - created_at > timedelta(hours=24):
+        update_approval(approval_id, "EXPIRED")
+        raise HTTPException(
+            status_code=400,
+            detail="Approval has expired"
+        )
+
     request = approval["request"]
 
     # Re-authorize immediately before execution.
@@ -100,10 +110,13 @@ def approve_approval(approval_id: str):
         }
 
     # Only now execute the tool.
+    tool_args = request.get("arguments", {}).copy()
+    tool_args.pop("_operation", None)
+    
     result = execute_tool(
         tool=request["tool"],
         action=request["action"],
-        arguments=request.get("arguments", {}),
+        arguments=tool_args,
     )
 
     update_approval(approval_id, "APPROVED")

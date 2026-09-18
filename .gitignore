@@ -38,3 +38,19 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Databases
+*.db
+*.sqlite
+
+# Environment
+.env
+.env.*
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/

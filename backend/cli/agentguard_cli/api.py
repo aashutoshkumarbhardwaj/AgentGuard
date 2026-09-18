@@ -95,3 +95,19 @@ def get_audit():
 def verify_audit():
 
     return get("/audit/verify")
+
+def authorize(payload: dict):
+    
+    response = requests.post(
+        f"{BASE_URL}/v1/authorize",
+        json=payload,
+        timeout=10,
+    )
+    
+    # We don't raise_for_status here because /authorize might return 403 or 404 for Blocked actions
+    # and we want to parse the JSON response.
+    try:
+        return response.json()
+    except Exception:
+        response.raise_for_status()
+        return {}
