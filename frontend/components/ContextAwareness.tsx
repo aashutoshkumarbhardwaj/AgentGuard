@@ -38,7 +38,7 @@ export default function ContextAwareness() {
   ];
 
   return (
-    <section className="py-24 border-b border-slate-800 bg-[#070A12] relative">
+    <section id="context-awareness" className="py-24 border-b border-slate-800 bg-[#070A12] relative">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}

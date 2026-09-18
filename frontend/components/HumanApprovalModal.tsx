@@ -23,7 +23,7 @@ export default function HumanApprovalModal() {
   };
 
   return (
-    <section className="py-24 border-b border-slate-800 bg-[#070A12] relative">
+    <section id="human-approval" className="py-24 border-b border-slate-800 bg-[#070A12] relative">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}

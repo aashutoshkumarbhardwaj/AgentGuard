@@ -76,7 +76,7 @@ async function executeAgentTool(toolName: string, params: Record<string, any>) {
   };
 
   return (
-    <section className="py-24 border-b border-slate-800 bg-[#06080E] relative">
+    <section id="developer-sdk" className="py-24 border-b border-slate-800 bg-[#06080E] relative">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
