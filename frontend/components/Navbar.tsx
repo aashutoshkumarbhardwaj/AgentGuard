@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ShieldCheck, Terminal, Github, ExternalLink, Menu, X, Lock } from "lucide-react";
+import SoundToggle from "@/components/ui/SoundToggle";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -48,6 +49,7 @@ export default function Navbar() {
 
         {/* Action Buttons */}
         <div className="hidden sm:flex items-center gap-3">
+          <SoundToggle />
           <a
             href="#attack-demo"
             className="flex items-center gap-1.5 rounded-md border border-red-500/30 bg-red-950/20 px-3 py-1.5 font-mono text-xs font-semibold text-red-300 transition-all hover:border-red-500/60 hover:bg-red-950/40 hover:text-red-200"

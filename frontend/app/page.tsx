@@ -18,6 +18,7 @@ import UseCases from "@/components/UseCases";
 import SecurityPrinciples from "@/components/SecurityPrinciples";
 import Footer from "@/components/Footer";
 import ParticlesBackground from "@/components/ui/ParticlesBackground";
+import ThreatRadar from "@/components/ui/ThreatRadar";
 
 export default function Home() {
   return (
@@ -34,6 +35,13 @@ export default function Home() {
 
         {/* 03 Live Security Interceptor Demo */}
         <LiveInterceptor />
+
+        {/* 03b Holographic Threat Radar Scanner (21st.dev / ThreeUI Inspired) */}
+        <section className="py-12 border-b border-slate-800 bg-[#060912] relative">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <ThreatRadar />
+          </div>
+        </section>
 
         {/* 04 Architectural Problem Comparison */}
         <ProblemComparison />

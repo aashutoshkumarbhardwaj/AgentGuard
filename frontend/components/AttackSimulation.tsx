@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ShieldAlert, Play, RotateCcw, ShieldCheck, Check, ArrowRight } from "lucide-react";
 import BorderBeam from "@/components/ui/BorderBeam";
+import { sound } from "@/utils/sound";
 
 export default function AttackSimulation() {
   const [stage, setStage] = useState<number>(0);
@@ -62,12 +63,21 @@ export default function AttackSimulation() {
   const handleSimulate = () => {
     setIsSimulating(true);
     setStage(1);
+    sound.playAlarm();
 
     let current = 1;
     const interval = setInterval(() => {
       current += 1;
       if (current <= 6) {
         setStage(current);
+        if (current === 3 || current === 4) {
+          sound.playClick();
+        } else if (current === 5) {
+          sound.playAlarm();
+        } else if (current === 6) {
+          sound.playIntercept();
+          setTimeout(() => sound.playSuccess(), 400);
+        }
       } else {
         clearInterval(interval);
         setIsSimulating(false);
@@ -76,6 +86,7 @@ export default function AttackSimulation() {
   };
 
   const handleReset = () => {
+    sound.playClick();
     setStage(0);
     setIsSimulating(false);
   };

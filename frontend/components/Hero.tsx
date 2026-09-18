@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import { Shield, ArrowRight, CheckCircle2, AlertTriangle, XCircle, Terminal, Cpu, Play, Sparkles } from "lucide-react";
 import BorderBeam from "@/components/ui/BorderBeam";
 import TextShimmer from "@/components/ui/TextShimmer";
+import { sound } from "@/utils/sound";
 
 export default function Hero() {
   const [activeTab, setActiveTab] = useState<"blocked" | "approved" | "allowed">("blocked");
@@ -140,7 +141,10 @@ export default function Hero() {
               {/* Interactive Scenario Tabs */}
               <div className="grid grid-cols-3 border-b border-slate-800 bg-[#0D1220] p-1 font-mono text-xs">
                 <button
-                  onClick={() => setActiveTab("blocked")}
+                  onClick={() => {
+                    sound.playIntercept();
+                    setActiveTab("blocked");
+                  }}
                   className={`py-1.5 text-center rounded transition-all ${
                     activeTab === "blocked"
                       ? "bg-red-950/60 text-red-300 border border-red-500/30 font-semibold"
@@ -150,7 +154,10 @@ export default function Hero() {
                   Destructive Deletion
                 </button>
                 <button
-                  onClick={() => setActiveTab("approved")}
+                  onClick={() => {
+                    sound.playClick();
+                    setActiveTab("approved");
+                  }}
                   className={`py-1.5 text-center rounded transition-all ${
                     activeTab === "approved"
                       ? "bg-amber-950/60 text-amber-300 border border-amber-500/30 font-semibold"
@@ -160,7 +167,10 @@ export default function Hero() {
                   External Email
                 </button>
                 <button
-                  onClick={() => setActiveTab("allowed")}
+                  onClick={() => {
+                    sound.playSuccess();
+                    setActiveTab("allowed");
+                  }}
                   className={`py-1.5 text-center rounded transition-all ${
                     activeTab === "allowed"
                       ? "bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 font-semibold"
