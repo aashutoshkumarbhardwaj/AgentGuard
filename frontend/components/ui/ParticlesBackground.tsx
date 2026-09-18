@@ -59,12 +59,12 @@ export default function ParticlesBackground() {
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
 
-        ctx.fillStyle = `rgba(16, 185, 129, ${p.alpha})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha * 0.35})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
 
-        // Connect nearby particles
+        // Connect nearby particles with subtle hairlines
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx = p.x - p2.x;
@@ -72,8 +72,8 @@ export default function ParticlesBackground() {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < 110) {
-            ctx.strokeStyle = `rgba(16, 185, 129, ${0.12 * (1 - dist / 110)})`;
-            ctx.lineWidth = 0.6;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.05 * (1 - dist / 110)})`;
+            ctx.lineWidth = 0.5;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);

@@ -103,21 +103,21 @@ export default function LiveInterceptor() {
   });
 
   return (
-    <section id="live-interceptor" className="py-20 border-b border-slate-800 bg-[#07090F] relative">
+    <section id="live-interceptor" className="py-20 border-b border-white/[0.08] bg-[#09090B] relative">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
           <div>
-            <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs mb-2">
-              <Activity className="h-4 w-4 animate-pulse" />
-              <span>LIVE TELEMETRY STREAM</span>
+            <div className="flex items-center gap-2 text-zinc-400 font-mono text-xs mb-2">
+              <Activity className="h-4 w-4 text-emerald-400" />
+              <span>LIVE GATEWAY TELEMETRY STREAM</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight font-sans">
-              Watch an agent get stopped.
+              Runtime tool execution telemetry.
             </h2>
-            <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-2xl">
-              Every tool request invoked by an autonomous agent is evaluated in single-digit milliseconds before execution.
+            <p className="text-zinc-400 text-sm sm:text-base mt-2 max-w-2xl">
+              Every tool request dispatched by an autonomous agent is evaluated in single-digit milliseconds before execution.
             </p>
           </div>
 

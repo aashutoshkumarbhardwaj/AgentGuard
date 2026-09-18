@@ -22,22 +22,22 @@ import ThreatRadar from "@/components/ui/ThreatRadar";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#06080D] text-slate-100 selection:bg-emerald-500/20 selection:text-emerald-300 relative">
-      {/* 21st.dev Ambient Cyber Particle Grid */}
+    <main className="min-h-screen bg-[#000000] text-zinc-100 selection:bg-white/20 selection:text-white relative">
+      {/* Subtle Ambient Background */}
       <ParticlesBackground />
 
       <div className="relative z-10">
         {/* 01 Navigation Bar */}
         <Navbar />
 
-        {/* 02 Hero Section with 3D Tilt & Laser Border Beam */}
+        {/* 02 Hero Section - Superset Style */}
         <Hero />
 
         {/* 03 Live Security Interceptor Demo */}
         <LiveInterceptor />
 
-        {/* 03b Holographic Threat Radar Scanner (21st.dev / ThreeUI Inspired) */}
-        <section id="threat-radar" className="py-12 border-b border-slate-800 bg-[#060912] relative">
+        {/* 03b Real-Time Telemetry & Incident Monitor */}
+        <section id="threat-radar" className="py-16 border-b border-white/[0.08] bg-[#000000] relative">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <ThreatRadar />
           </div>
