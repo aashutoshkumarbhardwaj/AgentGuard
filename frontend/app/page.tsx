@@ -17,63 +17,69 @@ import DeveloperSdk from "@/components/DeveloperSdk";
 import UseCases from "@/components/UseCases";
 import SecurityPrinciples from "@/components/SecurityPrinciples";
 import Footer from "@/components/Footer";
+import ParticlesBackground from "@/components/ui/ParticlesBackground";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#06080D] text-slate-100 selection:bg-emerald-500/20 selection:text-emerald-300">
-      {/* 01 Navigation Bar */}
-      <Navbar />
+    <main className="min-h-screen bg-[#06080D] text-slate-100 selection:bg-emerald-500/20 selection:text-emerald-300 relative">
+      {/* 21st.dev Ambient Cyber Particle Grid */}
+      <ParticlesBackground />
 
-      {/* 02 Hero Section */}
-      <Hero />
+      <div className="relative z-10">
+        {/* 01 Navigation Bar */}
+        <Navbar />
 
-      {/* 03 Live Security Interceptor Demo */}
-      <LiveInterceptor />
+        {/* 02 Hero Section with 3D Tilt & Laser Border Beam */}
+        <Hero />
 
-      {/* 04 Architectural Problem Comparison */}
-      <ProblemComparison />
+        {/* 03 Live Security Interceptor Demo */}
+        <LiveInterceptor />
 
-      {/* 05 Solution: Three Pillars (Intercept, Decide, Enforce) */}
-      <SolutionPillars />
+        {/* 04 Architectural Problem Comparison */}
+        <ProblemComparison />
 
-      {/* 06 Six Security Engines Grid */}
-      <FeatureGrid />
+        {/* 05 Solution: Three Pillars (Intercept, Decide, Enforce) */}
+        <SolutionPillars />
 
-      {/* 07 The Killer Feature: Prompt Injection & Attack Simulation */}
-      <AttackSimulation />
+        {/* 06 Six Security Engines Grid with Mouse Spotlights */}
+        <FeatureGrid />
 
-      {/* 08 Context-Aware Multi-Dimensional Authorization */}
-      <ContextAwareness />
+        {/* 07 The Killer Feature: Prompt Injection & Attack Simulation */}
+        <AttackSimulation />
 
-      {/* 09 Interactive Policy Editor & Runtime Simulator */}
-      <PolicySandbox />
+        {/* 08 Context-Aware Multi-Dimensional Authorization */}
+        <ContextAwareness />
 
-      {/* 10 Human-in-the-Loop Supervisory Approvals */}
-      <HumanApprovalModal />
+        {/* 09 Interactive Policy Editor & Runtime Simulator */}
+        <PolicySandbox />
 
-      {/* 11 Tamper-Evident SHA-256 Audit Ledger */}
-      <AuditLedger />
+        {/* 10 Human-in-the-Loop Supervisory Approvals */}
+        <HumanApprovalModal />
 
-      {/* 12 Deterministic Safety vs LLM Self-Policing */}
-      <DeterministicSecurity />
+        {/* 11 Tamper-Evident SHA-256 Audit Ledger */}
+        <AuditLedger />
 
-      {/* 13 Amazon Bedrock & AgentGuard Architecture Flow */}
-      <ArchitectureDiagram />
+        {/* 12 Deterministic Safety vs LLM Self-Policing */}
+        <DeterministicSecurity />
 
-      {/* 14 Enterprise AWS Technology Stack */}
-      <TechStack />
+        {/* 13 Amazon Bedrock & AgentGuard Architecture Flow */}
+        <ArchitectureDiagram />
 
-      {/* 15 Developer SDK Integration (Python & TypeScript) */}
-      <DeveloperSdk />
+        {/* 14 Enterprise AWS Technology Stack */}
+        <TechStack />
 
-      {/* 16 Concrete Agent Action Use Cases */}
-      <UseCases />
+        {/* 15 Developer SDK Integration (Python & TypeScript) */}
+        <DeveloperSdk />
 
-      {/* 17 The Five Axioms of Agent Governance */}
-      <SecurityPrinciples />
+        {/* 16 Concrete Agent Action Use Cases */}
+        <UseCases />
 
-      {/* 18 Hackathon Evaluator Call to Action & Footer */}
-      <Footer />
+        {/* 17 The Five Axioms of Agent Governance */}
+        <SecurityPrinciples />
+
+        {/* 18 Hackathon Evaluator Call to Action & Footer */}
+        <Footer />
+      </div>
     </main>
   );
 }

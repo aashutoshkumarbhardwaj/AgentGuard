@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldAlert, Play, RotateCcw, AlertTriangle, XCircle, ArrowRight, ShieldCheck, Mail, Database, Send, Lock, Check } from "lucide-react";
+import { ShieldAlert, Play, RotateCcw, ShieldCheck, Check, ArrowRight } from "lucide-react";
+import BorderBeam from "@/components/ui/BorderBeam";
 
 export default function AttackSimulation() {
   const [stage, setStage] = useState<number>(0);
@@ -71,7 +72,7 @@ export default function AttackSimulation() {
         clearInterval(interval);
         setIsSimulating(false);
       }
-    }, 1200);
+    }, 1100);
   };
 
   const handleReset = () => {
@@ -85,15 +86,15 @@ export default function AttackSimulation() {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-950/20 px-3.5 py-1 font-mono text-xs font-semibold text-red-300 mb-3">
-            <ShieldAlert className="h-3.5 w-3.5 text-red-400" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-950/20 px-3.5 py-1 font-mono text-xs font-semibold text-red-300 mb-3 shadow-sm">
+            <ShieldAlert className="h-3.5 w-3.5 text-red-400 animate-pulse" />
             <span>THE KILLER INTERCEPT: ATTACK SIMULATION</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight font-sans">
             What happens when an agent gets compromised?
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-slate-400">
-            Attackers don&apos;t need to crack your server. They inject malicious prompts into data your AI agent reads. Watch how AgentGuard stops the attack cold.
+          <p className="mt-4 text-base sm:text-lg text-slate-400 font-sans">
+            Attackers don&apos;t need to crack your server. They inject malicious prompts into data your AI agent reads. Watch how AgentGuard stops the attack cold in single-digit milliseconds.
           </p>
 
           {/* Interactive Trigger Button */}
@@ -101,45 +102,53 @@ export default function AttackSimulation() {
             <button
               onClick={handleSimulate}
               disabled={isSimulating}
-              className={`flex items-center gap-2 rounded-xl px-6 py-3.5 font-mono text-sm font-bold transition-all shadow-lg ${
+              className={`group relative flex items-center gap-2 rounded-xl px-7 py-3.5 font-mono text-sm font-bold transition-all shadow-xl overflow-hidden ${
                 isSimulating
                   ? "bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700"
-                  : "bg-red-600 text-white hover:bg-red-500 hover:shadow-red-600/30 border border-red-500"
+                  : "bg-red-600 text-white hover:bg-red-500 hover:shadow-red-600/40 border border-red-500 active:scale-95"
               }`}
             >
-              <Play className="h-4 w-4 fill-current" />
-              {isSimulating ? "Simulating Attack Pipeline..." : "Simulate Prompt Injection Attack"}
+              <Play className={`h-4 w-4 fill-current ${isSimulating ? "animate-spin" : "group-hover:scale-110"}`} />
+              {isSimulating ? `Processing Stage 0${stage}/06...` : "Simulate Prompt Injection Attack"}
             </button>
             {stage > 0 && (
               <button
                 onClick={handleReset}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3.5 font-mono text-xs text-slate-300 hover:bg-slate-800"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3.5 font-mono text-xs text-slate-300 hover:bg-slate-800 transition-colors"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
-                Reset
+                Reset Pipeline
               </button>
             )}
           </div>
         </div>
 
-        {/* Live Attack Timeline Container */}
-        <div className="rounded-2xl border border-slate-800 bg-[#0A0D1A] p-6 sm:p-8 shadow-2xl">
+        {/* Live Attack Timeline Container with Laser Border Beam */}
+        <div className="relative rounded-2xl border border-slate-800 bg-[#0A0D1A] p-6 sm:p-8 shadow-2xl overflow-hidden">
           
+          {/* Border Beam: Red during attack, Emerald when blocked */}
+          <BorderBeam
+            size={300}
+            duration={6}
+            colorFrom={stage >= 6 ? "#10B981" : stage > 0 ? "#EF4444" : "#475569"}
+            colorTo={stage >= 6 ? "#06B6D4" : stage > 0 ? "#F59E0B" : "#1E293B"}
+            borderWidth={2}
+          />
+
           {/* Simulated Attack Progression Steps */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {stages.map((st, index) => {
               const isActive = stage === index + 1;
               const isPast = stage > index + 1;
-              const isPending = stage < index + 1;
 
               return (
                 <div
                   key={st.num}
-                  className={`rounded-xl border p-4 font-mono text-xs transition-all relative ${
+                  className={`rounded-xl border p-4 font-mono text-xs transition-all duration-300 relative ${
                     isActive
-                      ? "border-red-500 bg-red-950/40 glow-crimson scale-[1.02]"
+                      ? "border-red-500 bg-red-950/50 glow-crimson scale-[1.03] shadow-lg shadow-red-500/20"
                       : isPast
-                      ? "border-slate-700 bg-slate-900/60 opacity-90"
+                      ? "border-slate-700 bg-slate-900/70 opacity-90"
                       : "border-slate-800/60 bg-slate-950/40 opacity-40"
                   }`}
                 >
@@ -148,7 +157,7 @@ export default function AttackSimulation() {
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider ${
                         st.status === "BLOCKED"
-                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-bounce"
                           : st.status === "COMPROMISED" || st.status === "INJECTED"
                           ? "bg-red-500/20 text-red-300 border border-red-500/40"
                           : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
@@ -160,20 +169,20 @@ export default function AttackSimulation() {
 
                   <h4 className="font-bold text-white text-sm mb-1">{st.title}</h4>
                   <div className="text-cyan-400 text-[11px] mb-2">{st.actor}</div>
-                  <p className="text-slate-300 text-[11px] leading-relaxed mb-3">
+                  <p className="text-slate-300 text-[11px] leading-relaxed mb-3 font-sans">
                     {st.desc}
                   </p>
 
                   {isActive && (
                     <div className="flex items-center gap-1.5 text-[10px] text-red-400 font-bold animate-pulse">
                       <span className="h-1.5 w-1.5 rounded-full bg-red-400"></span>
-                      PROCESSING TELEMETRY...
+                      ACTIVE TELEMETRY HOOK...
                     </div>
                   )}
                   {isPast && (
-                    <div className="flex items-center gap-1 text-[10px] text-emerald-400">
-                      <Check className="h-3 w-3" />
-                      COMPLETED &amp; LOGGED
+                    <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
+                      <Check className="h-3.5 w-3.5" />
+                      INTERCEPTED &amp; LOGGED
                     </div>
                   )}
                 </div>
@@ -185,29 +194,29 @@ export default function AttackSimulation() {
           <div className="rounded-xl border border-slate-800 bg-[#070A12] p-5 font-mono text-xs">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-lg border ${
+                <div className={`p-3 rounded-xl border transition-all ${
                   stage >= 6
-                    ? "border-emerald-500/40 bg-emerald-950/40 text-emerald-400 glow-emerald"
+                    ? "border-emerald-500/40 bg-emerald-950/40 text-emerald-400 glow-emerald scale-105"
                     : stage > 0
-                    ? "border-red-500/40 bg-red-950/40 text-red-400 glow-crimson"
+                    ? "border-red-500/40 bg-red-950/40 text-red-400 glow-crimson animate-pulse"
                     : "border-slate-700 bg-slate-900 text-slate-400"
                 }`}>
                   {stage >= 6 ? (
-                    <ShieldCheck className="h-6 w-6 text-emerald-400" />
+                    <ShieldCheck className="h-7 w-7 text-emerald-400" />
                   ) : (
-                    <ShieldAlert className="h-6 w-6 text-red-400" />
+                    <ShieldAlert className="h-7 w-7 text-red-400" />
                   )}
                 </div>
                 <div>
                   <div className="text-white font-bold text-sm">
                     {stage === 0 && "ATTACK DEFENSE SANDBOX READY"}
-                    {stage > 0 && stage < 6 && `ATTACK IN PROGRESS — STAGE 0${stage}/06`}
-                    {stage >= 6 && "ATTACK NEUTRALIZED: ZERO DATA EXFILTRATED"}
+                    {stage > 0 && stage < 6 && `CRITICAL INTRUSION DETECTED — STAGE 0${stage}/06`}
+                    {stage >= 6 && "ATTACK NEUTRALIZED: ZERO SENSITIVE DATA EXFILTRATED"}
                   </div>
-                  <div className="text-slate-400 text-xs mt-0.5">
-                    {stage === 0 && "Click 'Simulate Prompt Injection Attack' to execute an end-to-end exploit lifecycle."}
-                    {stage > 0 && stage < 6 && "AgentGuard runtime hooks actively intercepting tool execution requests."}
-                    {stage >= 6 && "Autonomous agent prevented from sending credentials to unauthorized external destination."}
+                  <div className="text-slate-400 text-xs mt-0.5 font-sans">
+                    {stage === 0 && "Click 'Simulate Prompt Injection Attack' to witness the live multi-stage defense pipeline."}
+                    {stage > 0 && stage < 6 && "AgentGuard in-line proxy actively evaluating tool calls and destination entropy."}
+                    {stage >= 6 && "Rogue agent execution severed at the socket layer. Complete audit proof written to S3 ledger."}
                   </div>
                 </div>
               </div>
@@ -217,19 +226,19 @@ export default function AttackSimulation() {
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-emerald-300 font-sans">
                   <div className="flex items-center gap-1.5">
                     <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                    <span>Sensitive data protected</span>
+                    <span>Sensitive credentials protected</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                    <span>Unauthorized action prevented</span>
+                    <span>Unauthorized tool blocked</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                    <span>Incident cryptographically recorded</span>
+                    <span>SHA-256 audit entry generated</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                    <span>Human security team alerted</span>
+                    <span>SOC Incident #INC-9482 dispatched</span>
                   </div>
                 </div>
               )}

@@ -1,10 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
-import { Shield, ShieldAlert, ArrowRight, CheckCircle2, AlertTriangle, XCircle, Terminal, Cpu, Play } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Shield, ArrowRight, CheckCircle2, AlertTriangle, XCircle, Terminal, Cpu, Play, Sparkles } from "lucide-react";
+import BorderBeam from "@/components/ui/BorderBeam";
+import TextShimmer from "@/components/ui/TextShimmer";
 
 export default function Hero() {
   const [activeTab, setActiveTab] = useState<"blocked" | "approved" | "allowed">("blocked");
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // 3D Perspective Tilt Physics on Mouse Move
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    const tiltX = (y / (rect.height / 2)) * -6; // max 6 deg
+    const tiltY = (x / (rect.width / 2)) * 6;
+    cardRef.current.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.01, 1.01, 1.01)`;
+  };
+
+  const handleMouseLeave = () => {
+    if (!cardRef.current) return;
+    cardRef.current.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
+  };
 
   return (
     <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 border-b border-slate-800/60 bg-grid-pattern">
@@ -17,10 +36,10 @@ export default function Hero() {
           {/* Left Hero Column: Headline & Value Proposition */}
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             
-            {/* Top Pill Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-950/20 px-3.5 py-1.5 font-mono text-xs font-medium text-emerald-300 backdrop-blur-sm mb-6">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>AI AGENT SECURITY • RUNTIME CONTROL LAYER</span>
+            {/* Top Pill Badge with Shimmer */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-950/20 px-3.5 py-1.5 font-mono text-xs font-medium text-emerald-300 backdrop-blur-sm mb-6 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+              <TextShimmer className="font-semibold">AI AGENT SECURITY • RUNTIME CONTROL LAYER</TextShimmer>
             </div>
 
             {/* Main Punchy Heading */}
@@ -37,32 +56,32 @@ export default function Hero() {
             </p>
 
             {/* Core Philosophy Callout */}
-            <div className="w-full max-w-2xl rounded-lg border border-slate-800 bg-slate-950/60 p-3.5 mb-8 font-mono text-xs text-slate-400 flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-cyan-400"></div>
+            <div className="w-full max-w-2xl rounded-xl border border-slate-800 bg-slate-950/70 p-4 mb-8 font-mono text-xs text-slate-400 flex items-center gap-3 shadow-inner">
+              <div className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse shrink-0"></div>
               <span>
                 <strong className="text-white font-semibold">Core Philosophy:</strong> AI can decide what it wants to do. AgentGuard decides what it is allowed to do.
               </span>
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons with Glowing Borders */}
             <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
               <a
                 href="#live-interceptor"
-                className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-400 hover:shadow-emerald-500/40"
+                className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-emerald-500 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/25 transition-all hover:bg-emerald-400 hover:shadow-emerald-500/40"
               >
-                <Terminal className="h-4 w-4" />
+                <Terminal className="h-4 w-4 transition-transform group-hover:scale-110" />
                 Explore Live Interceptor
               </a>
               <a
                 href="#architecture"
-                className="flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-900/80 px-6 py-3.5 text-sm font-semibold text-slate-200 backdrop-blur-sm transition-all hover:border-slate-500 hover:bg-slate-800 hover:text-white"
+                className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-6 py-3.5 text-sm font-semibold text-slate-200 backdrop-blur-sm transition-all hover:border-slate-500 hover:bg-slate-800 hover:text-white"
               >
                 View Architecture
                 <ArrowRight className="h-4 w-4 text-slate-400" />
               </a>
               <a
                 href="#attack-demo"
-                className="flex items-center justify-center gap-2 rounded-lg border border-red-500/30 bg-red-950/20 px-5 py-3.5 text-sm font-mono font-semibold text-red-300 transition-all hover:border-red-500/60 hover:bg-red-950/40"
+                className="flex items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-950/20 px-5 py-3.5 text-sm font-mono font-semibold text-red-300 transition-all hover:border-red-500/60 hover:bg-red-950/40"
               >
                 <Play className="h-3.5 w-3.5 fill-current text-red-400" />
                 Simulate Injection Attack
@@ -86,10 +105,24 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right Hero Column: Real-time Interceptor Visual */}
+          {/* Right Hero Column: Real-time Interceptor Visual with 3D Tilt & Border Beam */}
           <div className="lg:col-span-5">
-            <div className="relative rounded-xl border border-slate-800 bg-[#0A0E18] shadow-2xl overflow-hidden scanline-overlay">
-              
+            <div
+              ref={cardRef}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              style={{ transition: "transform 0.15s ease-out" }}
+              className="relative rounded-2xl border border-slate-800 bg-[#0A0E18] shadow-2xl overflow-hidden scanline-overlay"
+            >
+              {/* 21st.dev Laser Border Beam Effect */}
+              <BorderBeam
+                size={250}
+                duration={8}
+                colorFrom="#10B981"
+                colorTo="#06B6D4"
+                borderWidth={2}
+              />
+
               {/* Window Titlebar */}
               <div className="flex items-center justify-between border-b border-slate-800 bg-[#070A12] px-4 py-2.5 font-mono text-xs">
                 <div className="flex items-center gap-2">
@@ -98,7 +131,7 @@ export default function Hero() {
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80"></span>
                   <span className="text-slate-400 ml-2 font-mono">agentguard-interceptor.sys</span>
                 </div>
-                <span className="text-[11px] text-emerald-400 flex items-center gap-1">
+                <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-bold">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                   ACTIVE HOOK
                 </span>
@@ -144,7 +177,7 @@ export default function Hero() {
                 {/* Source Agent Box */}
                 <div className="rounded-lg border border-slate-800 bg-[#06080E] p-3.5">
                   <div className="flex items-center justify-between text-slate-400 mb-2">
-                    <span className="flex items-center gap-1.5 text-cyan-400">
+                    <span className="flex items-center gap-1.5 text-cyan-400 font-bold">
                       <Cpu className="h-3.5 w-3.5" />
                       AUTONOMOUS AGENT
                     </span>
@@ -178,7 +211,7 @@ export default function Hero() {
                 </div>
 
                 {/* AgentGuard Engine Decision Box */}
-                <div className={`rounded-lg border p-4 transition-all ${
+                <div className={`rounded-xl border p-4 transition-all ${
                   activeTab === "blocked" 
                     ? "border-red-500/40 bg-red-950/20 glow-crimson" 
                     : activeTab === "approved"
@@ -192,7 +225,7 @@ export default function Hero() {
                       }`} />
                       <span className="font-bold text-white tracking-wider">AGENTGUARD RUNTIME GATEWAY</span>
                     </div>
-                    <span className="text-[10px] text-slate-400">Cedar Policy v2.4</span>
+                    <span className="text-[10px] text-slate-400 font-mono">Cedar Policy v2.4</span>
                   </div>
 
                   {/* Grid Specs */}
@@ -251,7 +284,7 @@ export default function Hero() {
                 {/* Audit Hash Chained Footer */}
                 <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-800">
                   <span>Audit Hash: <code className="text-slate-400">e501b8...ac09</code></span>
-                  <span className="text-emerald-400">✓ Cryptographically Chained</span>
+                  <span className="text-emerald-400 font-bold">✓ Cryptographically Chained</span>
                 </div>
 
               </div>

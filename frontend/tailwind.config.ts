@@ -30,10 +30,25 @@ const config: Config = {
         mono: ["var(--font-jetbrains-mono)", "monospace"],
       },
       animation: {
+        "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+        "text-shimmer": "text-shimmer 3.5s ease-in-out infinite",
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "scanline": "scanline 8s linear infinite",
       },
       keyframes: {
+        "border-beam": {
+          "100%": {
+            "offset-distance": "100%",
+          },
+        },
+        "text-shimmer": {
+          "0%": {
+            "background-position": "0 0",
+          },
+          "100%": {
+            "background-position": "-200% 0",
+          },
+        },
         scanline: {
           "0%": { transform: "translateY(-100%)" },
           "100%": { transform: "translateY(1000%)" },
