@@ -12,6 +12,7 @@ import {
   LayerSequence,
   BrandMarkFrame,
   WorkflowSection,
+  AgentTypesSection,
   CaseStudiesSection,
   TestimonialsSection,
   BenchmarksSection,
@@ -38,10 +39,11 @@ export function LandingPage() {
       <LayerSequence />
       <BrandMarkFrame />
       <WorkflowSection />
-      <CaseStudiesSection />
-      <TestimonialsSection />
+      <AgentTypesSection />
       <BenchmarksSection />
       <PreFooterTalk />
+      <CaseStudiesSection />
+      <TestimonialsSection />
       <FooterCta />
       <span data-spark className="landing-spark landing-spark-one" aria-hidden="true"><Sparkles className="h-3 w-3" /></span>
       <span data-spark className="landing-spark landing-spark-two" aria-hidden="true"><Zap className="h-3 w-3" /></span>

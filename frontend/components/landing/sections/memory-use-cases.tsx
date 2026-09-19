@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Copy, Check } from 'lucide-react';
+import { CardSpotlight } from '@/components/ui/card-spotlight';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -472,24 +473,27 @@ export function MemoryUseCases() {
             {CARDS_DATA.map((card, index) => {
               const isForeground = activeCardIndex === index;
               return (
-                <div
+                <CardSpotlight
                   key={card.number}
                   ref={(el) => { cardsRef.current[index] = el; }}
+                  radius={280}
+                  color="#1a1033"
                   className={`memorable-stack-card ${isForeground ? 'card-foreground' : ''}`}
                 >
-                  <div className="memorable-card-number">{card.number}</div>
+                  <div className="memorable-card-number relative z-20">{card.number}</div>
                   
-                  <div className="memorable-card-content">
+                  <div className="memorable-card-content relative z-20">
                     <h3 className="memorable-card-title">{card.title}</h3>
                   </div>
 
-                  <p className="memorable-card-desc">{card.description}</p>
+                  <p className="memorable-card-desc relative z-20">{card.description}</p>
 
                   <div className="memorable-card-border-glow" />
-                </div>
+                </CardSpotlight>
               );
             })}
           </div>
+
 
           {/* Step indicators */}
           <div className="memorable-step-dots">

@@ -14,3 +14,4 @@ export * from './CaseStudiesSection';
 export * from './memory-use-cases';
 export * from './cinematic-intro';
 export * from './TestimonialsSection';
+export * from './AgentTypesSection';
