@@ -37,8 +37,8 @@ export function Scene1() {
         </div>
 
         {/* Main heading */}
-        <h1 className="scene1-heading">
-          Procedural, Graph Based<br />Memory For Agents.
+        <h1 className="scene1-heading" style={{ fontFamily: 'Memorable, sans-serif' }}>
+          Procedural, Graph<br />Based<br />Memory For Agents.
         </h1>
 
         {/* CTA row */}

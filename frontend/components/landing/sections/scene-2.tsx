@@ -19,7 +19,7 @@ export function Scene2() {
     <div className="scene2-root">
       {/* Left column */}
       <div className="scene2-left">
-        <h2 className="scene2-heading">
+        <h2 className="scene2-heading" style={{ fontFamily: 'Memorable, sans-serif' }}>
           Agents That Get Better<br />With Every Run.
         </h2>
         <p className="scene2-subtext">Watch the launch film.</p>

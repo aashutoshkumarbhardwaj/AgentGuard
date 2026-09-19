@@ -10,7 +10,6 @@ import {
   CinematicIntro,
   MemoryUseCases,
   LayerSequence,
-  BrandMarkFrame,
   WorkflowSection,
   AgentTypesSection,
   CaseStudiesSection,
@@ -37,7 +36,6 @@ export function LandingPage() {
       <CinematicIntro />
       <MemoryUseCases />
       <LayerSequence />
-      <BrandMarkFrame />
       <WorkflowSection />
       <AgentTypesSection />
       <BenchmarksSection />

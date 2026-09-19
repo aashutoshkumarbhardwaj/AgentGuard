@@ -164,3 +164,19 @@
   font-style: normal;
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'Memorable';
+  src: url('/fonts/7ebf22b5a21034f8-s.p.3strvg7o-g5v2.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Memorable';
+  src: url('/fonts/e41d5df559864f9e-s.p.2rlzm4mj5kw8e.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
