@@ -1,21 +1,38 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import './globals.css';
+import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
+import { AppShell } from '@/components/layout/app-shell';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: "AgentGuard — The Control Layer for Autonomous AI Agents",
-  description: "AgentGuard sits between autonomous AI agents and their tools. Evaluates every action against security policies, assesses risk, requests human approval, and halts unauthorized execution.",
-  keywords: ["AI agent security", "Agent governance", "Prompt injection defense", "Cedar policies", "Bedrock agents", "AI firewall"],
+  title: 'AgentGuard — Runtime Security Control Plane',
+  description:
+    'AgentGuard monitors every AI agent tool action, evaluates risk, detects threats, enforces permissions, and creates a verifiable audit trail.',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#06080D] text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300">
-        {children}
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+        suppressHydrationWarning
+      >
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

@@ -9,6 +9,33 @@ AI agents are increasingly given access to real-world tools (email, databases, f
 
 Relying on the AI to police itself is unsafe. AgentGuard solves this by decoupling authorization from intelligence.
 
+## Live Demo
+
+**Try AgentGuard:** [Live Playground](http://localhost:3000/playground)
+
+```bash
+pip install agentguard
+```
+```python
+from agentguard import AgentGuard
+
+guard = AgentGuard(
+    agent_id="research-agent",
+    server="http://localhost:8000"
+)
+
+guard.require(
+    "email",
+    "send",
+    arguments={
+        "to": "external@example.com"
+    }
+)
+```
+- **ALLOW** → executes
+- **APPROVE** → waits for human approval
+- **BLOCK** → execution halted
+
 ## Architecture
 
 ```mermaid

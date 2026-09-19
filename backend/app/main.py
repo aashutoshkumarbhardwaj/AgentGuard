@@ -18,11 +18,24 @@ async def lifespan(app: FastAPI):
     yield
 
 
+from fastapi.middleware.cors import CORSMiddleware
+import os
+
 app = FastAPI(
     title="AgentGuard",
     description="Runtime security and governance layer for AI agents",
     version="1.0.0",
     lifespan=lifespan
+)
+
+origins = os.environ.get("AGENTGUARD_CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 app.include_router(action_router)
 app.include_router(approval_router)
