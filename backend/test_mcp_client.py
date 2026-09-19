@@ -97,7 +97,7 @@ async def main():
 import httpx
 import sqlite3
 
-async def test_approval_lifecycle():
+async def run_approval_lifecycle():
     print("\n" + "="*50)
     print("TEST 6: Approval Lifecycle (APPROVE -> API -> EXECUTES)")
     print("="*50)
@@ -175,6 +175,6 @@ async def test_approval_lifecycle():
 if __name__ == "__main__":
     async def run_all():
         await main()
-        await test_approval_lifecycle()
+        await run_approval_lifecycle()
     import asyncio
     asyncio.run(run_all())

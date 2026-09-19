@@ -19,4 +19,4 @@ AgentGuard maintains a persistent SQLite ledger where every authorization decisi
 The prompt injection module currently relies on pattern matching and lightweight ML heuristics. It is an additional layer of defense-in-depth, not a silver bullet. You should always configure your Cedar policies with least-privilege principles.
 
 ## Responsible Disclosure
-If you discover a vulnerability that allows an agent to bypass an AgentGuard policy, please do not file a public issue. Email security@agentguard.com.
+If you discover a vulnerability that allows an agent to bypass an AgentGuard policy, please do not file a public issue. Instead, report it privately via the [GitHub Security Advisories](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) feature on this repository.
