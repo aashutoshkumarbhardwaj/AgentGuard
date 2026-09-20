@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentguard-shield"
-version = "1.0.0"
+version = "1.0.1"
 description = "Production-quality Python SDK for integrating AI agents with AgentGuard."
 readme = "README.md"
 requires-python = ">=3.10"
