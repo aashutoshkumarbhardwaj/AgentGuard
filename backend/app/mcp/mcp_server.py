@@ -27,17 +27,23 @@ logger = logging.getLogger("agentguard.mcp.server")
 logging.basicConfig(level=logging.INFO, stream=sys.stderr)
 
 
+def get_upstream_config_path(config_path: Optional[str] = None) -> Path:
+    """
+    Returns the resolved Path for MCP upstream server configuration.
+    """
+    path_str = config_path or os.environ.get("MCP_CONFIG_PATH")
+    if path_str:
+        return Path(path_str)
+    return Path(__file__).resolve().parent.parent.parent / "mcp_servers.json"
+
+
 def load_upstream_config(config_path: Optional[str] = None) -> List[UpstreamServerConfig]:
     """
     Loads upstream server configurations from a JSON file or environment variable.
     """
-    path = config_path or os.environ.get("MCP_CONFIG_PATH")
-    if not path:
-        default_path = Path(__file__).resolve().parent.parent.parent / "mcp_servers.json"
-        if default_path.exists():
-            path = str(default_path)
+    path = get_upstream_config_path(config_path)
 
-    if not path or not os.path.exists(path):
+    if not path.exists():
         return []
 
     try:
@@ -48,6 +54,22 @@ def load_upstream_config(config_path: Optional[str] = None) -> List[UpstreamServ
     except Exception as e:
         logger.error(f"Failed to load MCP server config from '{path}': {e}")
         return []
+
+
+def save_upstream_config(
+    configs: List[UpstreamServerConfig], config_path: Optional[str] = None
+) -> None:
+    """
+    Saves upstream server configurations safely to JSON file.
+    Does NOT save in-memory mock transports or resolved secrets.
+    """
+    path = get_upstream_config_path(config_path)
+    # Filter out memory-only transports used in unit tests
+    persistable = [cfg.to_dict() for cfg in configs if cfg.transport != "memory"]
+    data = {"servers": persistable}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
 
 
 def create_gateway_server(upstream_manager: UpstreamManager) -> ll.Server:

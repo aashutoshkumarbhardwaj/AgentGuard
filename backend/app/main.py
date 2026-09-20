@@ -13,6 +13,8 @@ from app.api.simulation import router as simulation_router
 from app.api.audit import router as audit_router
 from app.api.authorize import router as authorize_router
 from app.api.agents import router as agents_router
+from app.api.mcp import router as mcp_router
+from app.api.policies import router as policies_router
 
 logger = logging.getLogger("agentguard.main")
 
@@ -80,6 +82,9 @@ app.include_router(audit_router)
 app.include_router(audit_router, prefix="/v1")
 app.include_router(authorize_router)
 app.include_router(agents_router)
+app.include_router(mcp_router)
+app.include_router(policies_router)
+app.include_router(policies_router, prefix="/v1")
 
 # ── MCP Streamable HTTP gateway at /mcp ─────────────────────────────────────
 # The gateway is mounted as a sub-ASGI app.  It shares the UpstreamManager
@@ -162,6 +167,7 @@ def health():
             bedrock_ready = False
 
     mcp_upstream_count = len(_SHARED_MCP_MANAGER.sessions) if _SHARED_MCP_MANAGER else 0
+    mcp_tools_count = len(_SHARED_MCP_MANAGER.discovered_tools) if _SHARED_MCP_MANAGER else 0
 
     is_healthy = (db_status == "online") and (not bedrock_required or bedrock_ready)
 
@@ -177,4 +183,5 @@ def health():
         "audit": db_status,
         "mcp_gateway": "online",
         "mcp_upstream_servers": mcp_upstream_count,
+        "mcp_tools_discovered": mcp_tools_count,
     }

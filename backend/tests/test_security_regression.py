@@ -79,15 +79,23 @@ def test_audit_tampering_detection():
     # Tamper with the database manually
     from app.db.agents import get_connection
     conn = get_connection()
+    row = conn.execute("SELECT risk_score FROM audit_logs WHERE event_id = (SELECT MAX(event_id) FROM audit_logs)").fetchone()
+    original_score = row[0] if row else 20
     # Modify the most recent event's risk_score
-    conn.execute("UPDATE audit_logs SET risk_score = 0 WHERE event_id = (SELECT MAX(event_id) FROM audit_logs)")
+    conn.execute("UPDATE audit_logs SET risk_score = 999 WHERE event_id = (SELECT MAX(event_id) FROM audit_logs)")
     conn.commit()
-    conn.close()
     
     # Verify chain is broken
     response = client.get("/audit/verify")
     assert response.status_code == 200
     assert response.json()["valid"] is False
+
+    # Restore original score so database maintains integrity
+    conn.execute("UPDATE audit_logs SET risk_score = ? WHERE event_id = (SELECT MAX(event_id) FROM audit_logs)", (original_score,))
+    conn.commit()
+    conn.close()
+
+    assert client.get("/audit/verify").json()["valid"] is True
 
 def test_approval_lifecycle_revocation():
     # 1. Create approval for email send

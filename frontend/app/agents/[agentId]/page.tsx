@@ -1,9 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Bot, Shield, Activity, Lock, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { agents, permissionsByAgent, liveEvents } from '@/lib/mock-data';
+import { API_URL, fetchAuditLogs } from '@/lib/api';
 import { CardSpotlight } from '@/components/ui/card-spotlight';
 import { DecisionBadge } from '@/components/dashboard/decision-badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,16 +21,62 @@ const statusConfig = {
 export default function AgentDetailPage() {
   const params = useParams<{ agentId: string }>();
   const router = useRouter();
-  const agent = agents.find((a) => a.id === params.agentId);
-  const permissions = permissionsByAgent[params.agentId] || [];
-  const agentEvents = liveEvents.filter((e) => e.agentId === params.agentId);
+  const [agent, setAgent] = useState<any | null>(null);
+  const [permissions, setPermissions] = useState<any[]>([]);
+  const [agentEvents, setAgentEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!params.agentId) return;
+    fetch(`${API_URL}/agents/${params.agentId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data) {
+          setAgent({
+            id: data.id,
+            name: data.name || data.id,
+            framework: data.framework || 'MCP Agent',
+            description: `Registered agent runtime owned by ${data.owner || 'system'}.`,
+            status: 'ACTIVE',
+            riskScore: 12,
+            actions: 0,
+            blocked: 0,
+            permissions: (data.allowed_tools || []).length,
+            tools: data.allowed_tools || [],
+          });
+          const perms = (data.allowed_tools || []).map((toolName: string) => ({
+            action: toolName,
+            category: toolName.split('.')[0] || 'tool',
+            status: 'GRANTED',
+            riskLevel: toolName.includes('delete') || toolName.includes('modify') ? 'HIGH' : 'LOW',
+            lastUsed: 'Dynamic',
+          }));
+          setPermissions(perms);
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+
+    fetchAuditLogs().then((logs) => {
+      const relevant = (logs || []).filter((l: any) => l.agent_id === params.agentId);
+      setAgentEvents(relevant);
+    });
+  }, [params.agentId]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-white/50 font-memorable">
+        <p className="text-sm font-mono">Loading agent telemetry...</p>
+      </div>
+    );
+  }
 
   if (!agent) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-white/50 font-memorable">
         <p className="text-lg">Agent not found.</p>
         <button
-          onClick={() => router.push('/agents')}
+          onClick={() => router.push('/app/agents')}
           className="mt-4 px-4 py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 hover:bg-sky-500/20 transition-colors"
         >
           Back to Agents
@@ -38,7 +85,7 @@ export default function AgentDetailPage() {
     );
   }
 
-  const status = statusConfig[agent.status];
+  const status = (statusConfig as any)[agent.status] || statusConfig.ACTIVE;
 
   return (
     <div className="relative w-full space-y-8 pb-16 font-memorable select-none">
@@ -143,7 +190,7 @@ export default function AgentDetailPage() {
                       <span className="font-mono text-sky-400 font-bold">{agent.tools.length}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {agent.tools.map((tool) => (
+                      {(agent.tools || []).map((tool: string) => (
                         <span
                           key={tool}
                           className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs font-mono text-white/80"

@@ -18,17 +18,26 @@ import {
   Power,
   Terminal,
 } from 'lucide-react';
-import { policies as initialPolicies } from '@/lib/mock-data';
+import { useEffect } from 'react';
+import { fetchPolicies } from '@/lib/api';
 import { CardSpotlight } from '@/components/ui/card-spotlight';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import type { Policy } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 export default function PoliciesPage() {
-  const [policyList, setPolicyList] = useState<Policy[]>(initialPolicies);
+  const [policyList, setPolicyList] = useState<Policy[]>([]);
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
   const [effectFilter, setEffectFilter] = useState<'ALL' | 'ACTIVE' | 'PERMIT' | 'DENY'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    fetchPolicies().then((res) => {
+      if (res && res.length > 0) {
+        setPolicyList(res as any);
+      }
+    });
+  }, []);
 
   const activeCount = policyList.filter((p) => p.status === 'ACTIVE').length;
   const permitCount = policyList.filter((p) => p.effect === 'PERMIT').length;

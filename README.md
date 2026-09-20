@@ -2,19 +2,104 @@
 
 **AI can decide what it wants to do. AgentGuard decides what it is allowed to do.**
 
-AgentGuard is a universal runtime security and authorization control plane for AI agents. It acts as an independent security gateway that intercepts AI agent tool invocations, evaluates them against organizational security policies, and blocks malicious, destructive, or unauthorized actions before they execute.
+AgentGuard is a universal, local-first runtime security and authorization control plane for AI agents and Model Context Protocol (MCP) tool calls. It acts as an independent security gateway between any AI agent/client and any upstream MCP tool server, evaluating requests against deterministic authorization policies, threat detectors, risk heuristics, and sensitive data classifiers before allowing execution.
 
-## The Problem
-AI agents are increasingly given access to real-world tools (email, databases, filesystems, deployment pipelines). However, AI models are inherently unpredictable and susceptible to prompt injection, hallucination, and adversarial manipulation. 
+---
 
-Relying on the AI to police itself is unsafe. AgentGuard solves this by decoupling authorization from intelligence.
+## ⚡ Quickstart (Local-First in 30 Seconds)
 
-## Live Demo
-
-**Try AgentGuard:** [Live Playground](http://localhost:3000/playground)
+Get up and running locally with a single command:
 
 ```bash
-pip install agentguard
+# 1. Clone repository
+git clone https://github.com/aashutoshkumarbhardwaj/AgentGuard.git
+cd AgentGuard
+
+# 2. Start AgentGuard
+agentguard start
+```
+
+Or using the local runner directly:
+```bash
+./agentguard start
+```
+
+### Local Endpoints
+
+Once started, AgentGuard provides:
+
+- **Security Console:** [http://localhost:8787/app](http://localhost:8787/app)
+- **Landing Page:** [http://localhost:8787](http://localhost:8787)
+- **REST API:** [http://localhost:8000](http://localhost:8000)
+- **Universal MCP Gateway:** [http://localhost:8000/mcp](http://localhost:8000/mcp)
+
+```
+╭────────────────────────────────────────────╮
+│              AgentGuard                    │
+│       AI Agent Runtime Security            │
+╰────────────────────────────────────────────╯
+
+✓ API          http://localhost:8000
+✓ Console      http://localhost:8787/app
+✓ MCP Gateway  http://localhost:8000/mcp
+
+MCP Servers
+✓ 2 connected
+✓ 11 tools discovered
+
+AgentGuard is ready.
+```
+
+---
+
+## 🛡️ The Developer Experience
+
+1. **Start AgentGuard** (`agentguard start`).
+2. **Open Dashboard** at `http://localhost:8787/mcp`.
+3. **Add Upstream MCP Server** (Local `stdio` or Remote `streamable-http`).
+4. **Discover Tools** — AgentGuard automatically discovers, namespaces, and registers all upstream tools.
+5. **Connect Your Agent** — Point Claude Desktop, Cursor, or any custom MCP client to `http://localhost:8000/mcp`.
+6. **Every Tool Call is Protected** — Invocations flow through:
+   `Agent → Cedar Policy → Risk Engine → Threat Detection → Sensitive Data → ALLOW / APPROVE / BLOCK → Upstream Server`.
+
+---
+
+## 🏛️ MCP Gateway Architecture
+
+```
+AI AGENT / CLIENT (Claude, Cursor, LangChain, SDK)
+                  │
+                  ▼
+       AgentGuard MCP Gateway (http://localhost:8000/mcp)
+                  │
+                  ├── 1. Dynamic Tool Aggregation (namespaced: server_id:tool_name)
+                  ├── 2. Request Normalization
+                  ├── 3. Cedar Authorization Engine (Deterministic RBAC/ABAC)
+                  ├── 4. Risk Engine & Heuristic Scorer
+                  ├── 5. Prompt Injection Threat Detection
+                  ├── 6. Sensitive Data & PII Classifier
+                  ├── 7. Amazon Bedrock Guardrails (if configured)
+                  │
+                  ▼
+        ALLOW / APPROVE / BLOCK
+       ┌──────────┬──────────┐
+       │          │          │
+    [ALLOW]   [APPROVE]   [BLOCK]
+       │          │          │
+       ▼          ▼          ▼
+Forward to    Create JIT    Execution
+Upstream      Approval      Halted & Logged
+MCP Server    in Dashboard  (Fail-Closed)
+```
+
+---
+
+## 📦 Python SDK Usage
+
+You can also use the AgentGuard Python SDK for in-process or agent library enforcement:
+
+```bash
+pip install agentguard-shield
 ```
 ```python
 from agentguard import AgentGuard
@@ -24,6 +109,7 @@ guard = AgentGuard(
     server="http://localhost:8000"
 )
 
+# Enforce security boundary
 guard.require(
     "email",
     "send",
@@ -32,11 +118,13 @@ guard.require(
     }
 )
 ```
-- **ALLOW** → executes
-- **APPROVE** → waits for human approval
-- **BLOCK** → execution halted
+- **ALLOW** → executes immediately
+- **APPROVE** → creates pending human-in-the-loop approval
+- **BLOCK** → execution halted (raises exception)
 
-## Architecture
+---
+
+## Architecture Flow
 
 ```mermaid
 flowchart LR
@@ -131,6 +219,8 @@ AgentGuard remains the sovereign policy decision maker. Bedrock acts as a high-f
 2. **Independent ML Signal**: Amazon Bedrock Guardrails evaluates text using AWS's `ApplyGuardrail` API (without invoking generative foundation models unnecessarily) to detect prompt injection jailbreaks and sensitive PII.
 3. **Defense-in-Depth**: Bedrock signals are combined with local heuristic/ML detectors and the contextual risk engine to calculate an aggregate risk score (0–100) before emitting `ALLOW`, `APPROVE`, or `BLOCK`.
 4. **Fail-Closed Reliability**: If Bedrock is configured as required (`BEDROCK_REQUIRED=true`) and experiences an AWS outage, AgentGuard fails closed, refusing to permit uninspected risky operations.
+
+> **Deployment Note:** If AWS Bedrock credentials are not configured or `BEDROCK_ENABLED=false`, `/health` will return `bedrock: false`. AgentGuard gracefully falls back to its built-in heuristic and ML threat detection engine with zero downtime or service interruption.
 
 ### AWS Cloud Components
 - **Amazon ECS Fargate**: Serverless container execution for FastAPI, Cedar runtime, and threat detectors.

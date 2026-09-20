@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, Menu, X } from 'lucide-react';
+import { ChevronRight, Heart, Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
 
 const NAV_ITEMS = [
@@ -61,8 +61,17 @@ export function Header() {
             );
           })}
         </nav>
-        <div className="hidden items-center gap-4 md:flex">
-          <a href="mailto:hello@agentguard.dev" className="landing-outline-button">BOOK A CALL</a>
+        <div className="hidden items-center gap-3 md:flex">
+          <a
+            href="https://github.com/sponsors/aashutoshkumarbhardwaj"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-rose-500/30 bg-rose-500/10 text-rose-300 hover:text-white hover:bg-rose-500/20 hover:border-rose-500/60 transition-all font-mono text-[11px] tracking-wider"
+          >
+            <Heart className="h-3.5 w-3.5 fill-rose-500/80 text-rose-400" />
+            <span>SPONSOR</span>
+          </a>
+          <a href="https://www.aashutoshkumarbhardwaj.xyz/" className="landing-outline-button">BOOK A CALL</a>
           <Link href="/overview" prefetch={true} className="landing-solid-button">
             DASHBOARD <ChevronRight className="h-3.5 w-3.5 ml-1" />
           </Link>
@@ -97,7 +106,16 @@ export function Header() {
                 </a>
               );
             })}
-            <a href="mailto:hello@agentguard.dev" className="mt-2 block rounded-lg border border-white/10 text-center px-3 py-2.5 text-sm font-mono tracking-wider text-white">BOOK A CALL</a>
+            <a
+              href="https://github.com/sponsors/aashutoshkumarbhardwaj"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 flex items-center justify-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-sm font-mono tracking-wider text-rose-300 hover:bg-rose-500/20"
+            >
+              <Heart className="h-4 w-4 fill-rose-500/80 text-rose-400" />
+              <span>SPONSOR PROJECT</span>
+            </a>
+            <a href="https://www.aashutoshkumarbhardwaj.xyz/" className="mt-2 block rounded-lg border border-white/10 text-center px-3 py-2.5 text-sm font-mono tracking-wider text-white">BOOK A CALL</a>
             <Link href="/overview" prefetch={true} className="mt-2 flex items-center justify-center rounded-lg bg-white px-3 py-2.5 text-sm font-bold tracking-wider text-black">DASHBOARD</Link>
           </div>
         )}

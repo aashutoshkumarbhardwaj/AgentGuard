@@ -2,10 +2,11 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { Bot, ArrowRight, Shield, Activity, Lock, AlertTriangle, Radio } from 'lucide-react';
-import { agents } from '@/lib/mock-data';
 import { CardSpotlight } from '@/components/ui/card-spotlight';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
+import { fetchAgents, AgentRecord } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 const statusConfig = {
@@ -30,9 +31,30 @@ const statusConfig = {
 };
 
 export default function AgentsPage() {
-  const totalActions = agents.reduce((acc, a) => acc + a.actions, 0);
-  const totalBlocked = agents.reduce((acc, a) => acc + a.blocked, 0);
-  const totalPermissions = agents.reduce((acc, a) => acc + a.permissions, 0);
+  const [agentList, setAgentList] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchAgents().then((realAgents) => {
+      if (realAgents && realAgents.length > 0) {
+        const mapped = realAgents.map((a) => ({
+          id: a.id,
+          name: a.name || a.id,
+          framework: a.framework || 'MCP Agent',
+          description: `Registered agent runtime with ${a.allowed_tools.length} configured permission boundaries.`,
+          status: 'ACTIVE',
+          permissions: a.allowed_tools.length,
+          actions: 0,
+          blocked: 0,
+          allowed_tools: a.allowed_tools,
+        }));
+        setAgentList(mapped);
+      }
+    });
+  }, []);
+
+  const totalActions = agentList.reduce((acc, a) => acc + (a.actions || 0), 0);
+  const totalBlocked = agentList.reduce((acc, a) => acc + (a.blocked || 0), 0);
+  const totalPermissions = agentList.reduce((acc, a) => acc + (a.permissions || 0), 0);
 
   return (
     <div className="relative w-full space-y-8 pb-20 font-memorable select-none">
@@ -64,7 +86,7 @@ export default function AgentsPage() {
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
             </span>
             <span className="text-[12px] font-medium text-zinc-300">
-              {agents.length} Connected Runtimes
+              {agentList.length} Connected Runtimes
             </span>
           </div>
         </div>
@@ -82,7 +104,7 @@ export default function AgentsPage() {
                   <Bot className="h-4.5 w-4.5 text-zinc-300" />
                 </div>
                 <span className="text-[10.5px] font-medium px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-300">
-                  {agents.length} CONNECTED
+                  {agentList.length} CONNECTED
                 </span>
               </div>
               <h3 className="text-lg font-semibold text-white tracking-tight mt-3">Active Runtimes</h3>
@@ -146,9 +168,16 @@ export default function AgentsPage() {
         {/* ========================================================================= */}
         {/* Agent Cards Grid (Top Company Luxury Bento Cards)                         */}
         {/* ========================================================================= */}
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {agents.map((agent) => {
-            const status = statusConfig[agent.status];
+        {agentList.length === 0 ? (
+          <div className="py-16 text-center text-zinc-500 rounded-2xl bg-[#0a0c10]/95 border border-white/[0.08] p-8">
+            <Bot className="h-8 w-8 mx-auto mb-2 opacity-40 text-zinc-400" />
+            <p className="text-sm font-semibold text-zinc-300">No registered agents</p>
+            <p className="text-xs text-zinc-500 mt-1">No AI agents are currently registered in AgentGuard.</p>
+          </div>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {agentList.map((agent) => {
+              const status = (statusConfig as any)[agent.status] || statusConfig.ACTIVE;
             return (
               <div key={agent.id} className="group/link block">
                 <CardSpotlight className="p-6 sm:p-7 flex flex-col justify-between h-full min-h-[310px] rounded-2xl bg-[#0a0c10]/95 border border-white/[0.08] hover:border-white/[0.18] transition-all duration-300">
@@ -236,6 +265,7 @@ export default function AgentsPage() {
             );
           })}
         </div>
+      )}
       </div>
     </div>
   );

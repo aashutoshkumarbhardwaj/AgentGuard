@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+# AgentGuard Developer Launcher
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_PYTHON="$ROOT_DIR/backend/.venv/bin/python"
+
+if [ -f "$VENV_PYTHON" ]; then
+    exec "$VENV_PYTHON" -m agentguard_cli.main "$@"
+else
+    exec python3 -m agentguard_cli.main "$@"
+fi

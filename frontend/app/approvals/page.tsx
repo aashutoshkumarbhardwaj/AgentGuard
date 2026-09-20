@@ -24,35 +24,62 @@ import {
   Terminal,
   AlertCircle,
 } from 'lucide-react';
-import { pendingApprovals as initialApprovals } from '@/lib/mock-data';
 import { CardSpotlight } from '@/components/ui/card-spotlight';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
-import type { Approval } from '@/lib/types';
+import { fetchApprovals, approveApproval, rejectApproval } from '@/lib/api';
+import type { Approval, RiskLevel } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useEffect } from 'react';
 
 export default function ApprovalsPage() {
-  const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
+  const [approvals, setApprovals] = useState<Approval[]>([]);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [removeAction, setRemoveAction] = useState<'approve' | 'deny' | null>(null);
   const [selectedApproval, setSelectedApproval] = useState<Approval | null>(null);
   const [riskFilter, setRiskFilter] = useState<'ALL' | 'HIGH' | 'MEDIUM'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [auditLog, setAuditLog] = useState<Array<{ id: string; action: string; agent: string; decision: 'APPROVED' | 'DENIED'; timestamp: string; hash: string }>>([
-    {
-      id: 'ap-000',
-      action: 'database.query',
-      agent: 'analytics-agent',
-      decision: 'APPROVED',
-      timestamp: '12:20:04',
-      hash: 'sha256-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-    },
-  ]);
+  const [auditLog, setAuditLog] = useState<Array<{ id: string; action: string; agent: string; decision: 'APPROVED' | 'DENIED'; timestamp: string; hash: string }>>([]);
 
-  const handleApprove = (id: string) => {
+  const loadBackendApprovals = async () => {
+    try {
+      const backendList = await fetchApprovals();
+      const mapped: Approval[] = (backendList || [])
+        .filter((item: any) => item.status === 'PENDING')
+        .map((item: any) => ({
+          id: item.id,
+          agentId: item.request?.agent_id || 'research-agent',
+          action: item.request?.original_tool || `${item.request?.tool || 'tool'}:${item.request?.action || 'action'}`,
+          riskScore: item.decision?.risk_score ?? 85,
+          riskLevel: (item.decision?.risk_level as RiskLevel) || 'HIGH',
+          reason: item.decision?.reason || 'External action requires human approval.',
+          destination: item.request?.context?.destination || item.request?.resource || 'external@example.com',
+          timestamp: item.created_at ? new Date(item.created_at).toLocaleTimeString([], { hour12: false }) : 'Just now',
+          status: item.status || 'PENDING',
+        }));
+      setApprovals(mapped);
+    } catch (err) {
+      console.error('Failed to load approvals:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadBackendApprovals();
+    const timer = setInterval(loadBackendApprovals, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleApprove = async (id: string) => {
     const item = approvals.find((a) => a.id === id);
     setRemoveAction('approve');
     setRemovingId(id);
+
+    try {
+      await approveApproval(id);
+    } catch (err) {
+      console.warn('Backend approval call error (or mock fallback):', err);
+    }
+
     setTimeout(() => {
       if (item) {
         setAuditLog((prev) => [
@@ -73,10 +100,17 @@ export default function ApprovalsPage() {
     }, 400);
   };
 
-  const handleDeny = (id: string) => {
+  const handleDeny = async (id: string) => {
     const item = approvals.find((a) => a.id === id);
     setRemoveAction('deny');
     setRemovingId(id);
+
+    try {
+      await rejectApproval(id);
+    } catch (err) {
+      console.warn('Backend rejection call error (or mock fallback):', err);
+    }
+
     setTimeout(() => {
       if (item) {
         setAuditLog((prev) => [
@@ -98,7 +132,7 @@ export default function ApprovalsPage() {
   };
 
   const handleResetQueue = () => {
-    setApprovals(initialApprovals);
+    loadBackendApprovals();
     setRemovingId(null);
     setRemoveAction(null);
   };
@@ -305,18 +339,16 @@ export default function ApprovalsPage() {
               )}
             </div>
 
-            {approvals.length < initialApprovals.length && (
-              <HoverBorderGradient
-                as="button"
-                containerClassName="rounded-xl"
-                className="bg-[#0e1118] text-zinc-300 hover:text-white text-[11.5px] font-medium px-3.5 py-1.5 flex items-center gap-1.5"
-                highlight="radial-gradient(75% 181% at 50% 50%, #ffffff 0%, rgba(255, 255, 255, 0.4) 100%)"
-                onClick={handleResetQueue}
-              >
-                <RotateCcw className="h-3 w-3" />
-                <span>Reset Queue</span>
-              </HoverBorderGradient>
-            )}
+            <HoverBorderGradient
+              as="button"
+              containerClassName="rounded-xl"
+              className="bg-[#0e1118] text-zinc-300 hover:text-white text-[11.5px] font-medium px-3.5 py-1.5 flex items-center gap-1.5"
+              highlight="radial-gradient(75% 181% at 50% 50%, #ffffff 0%, rgba(255, 255, 255, 0.4) 100%)"
+              onClick={handleResetQueue}
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>Refresh Queue</span>
+            </HoverBorderGradient>
           </div>
         </div>
 
@@ -328,9 +360,9 @@ export default function ApprovalsPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.05] border border-white/[0.1] text-zinc-300">
               <Check className="h-6 w-6 text-white" strokeWidth={2.2} />
             </div>
-            <h3 className="text-xl font-semibold text-white tracking-tight mt-5">Queue Clear</h3>
+            <h3 className="text-xl font-semibold text-white tracking-tight mt-5">No pending approvals</h3>
             <p className="text-[13.5px] text-zinc-400 mt-1 max-w-sm font-normal">
-              Zero actions pending sign-off. All agent runtime invocations have been evaluated and executed.
+              AgentGuard is not waiting for human authorization.
             </p>
             <HoverBorderGradient
               as="button"
@@ -340,7 +372,7 @@ export default function ApprovalsPage() {
               onClick={handleResetQueue}
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              <span>Restore Demo Queue</span>
+              <span>Refresh Queue</span>
             </HoverBorderGradient>
           </CardSpotlight>
         ) : filteredApprovals.length === 0 ? (
@@ -536,7 +568,7 @@ export default function ApprovalsPage() {
                               disabled={isRemoving}
                             >
                               <Check className="h-3.5 w-3.5 text-emerald-400" strokeWidth={2.5} />
-                              <span>Approve</span>
+                              <span>Approve Once</span>
                             </HoverBorderGradient>
                           </div>
                         </div>

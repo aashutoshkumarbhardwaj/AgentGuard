@@ -6,6 +6,7 @@ import { motion, useMotionValue, useMotionTemplate } from 'motion/react';
 import {
   ArrowRight,
   ChevronRight,
+  Heart,
   Sparkles,
   Zap,
 } from 'lucide-react';
@@ -210,7 +211,18 @@ export function FooterCta() {
                 <li><a href="#case-studies" className="hover:text-white transition-colors">Case Studies</a></li>
                 <li><Link href="/docs" className="hover:text-white transition-colors">Security Model</Link></li>
                 <li><Link href="/developer" className="hover:text-white transition-colors">API Reference</Link></li>
-                <li><a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">SDK Repository</a></li>
+                <li><a href="https://github.com/aashutoshkumarbhardwaj/AgentGuard" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub Repository</a></li>
+                <li>
+                  <a
+                    href="https://github.com/sponsors/aashutoshkumarbhardwaj"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-rose-400 text-rose-300 transition-colors flex items-center gap-1.5"
+                  >
+                    <Heart className="h-3 w-3 fill-rose-500 text-rose-500" />
+                    Sponsor Project
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

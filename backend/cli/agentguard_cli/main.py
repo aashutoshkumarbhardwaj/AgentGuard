@@ -1,10 +1,23 @@
-from .tui import run_tui
-import typer
+import os
+import sys
 import time
+import signal
+import shutil
+import pathlib
+import requests
+import webbrowser
+import subprocess
+from typing import Optional
 
+import typer
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+
+try:
+    from .tui import run_tui
+except ImportError:
+    run_tui = None
 
 from .api import (
     get_approvals,
@@ -18,7 +31,6 @@ from .api import (
     deny_permission,
 )
 
-
 app = typer.Typer(
     name="agentguard",
     help="AgentGuard runtime security control plane.",
@@ -28,14 +40,245 @@ app = typer.Typer(
 console = Console()
 
 
+def find_repo_root() -> pathlib.Path:
+    """Finds the AgentGuard repository root containing backend and frontend."""
+    cwd = pathlib.Path.cwd()
+    if (cwd / "backend" / "app" / "main.py").exists() and (cwd / "frontend" / "package.json").exists():
+        return cwd
+    pkg_dir = pathlib.Path(__file__).resolve().parent
+    for p in [pkg_dir, *pkg_dir.parents]:
+        if (p / "backend" / "app" / "main.py").exists() and (p / "frontend" / "package.json").exists():
+            return p
+    return cwd
+
+
 @app.callback(invoke_without_command=True)
 def main(ctx: typer.Context):
     """
     AgentGuard CLI.
     """
-
     if ctx.invoked_subcommand is None:
-        run_tui()
+        if run_tui is not None:
+            run_tui()
+        else:
+            show_dashboard()
+
+
+def is_port_in_use(port: int, host: str = "127.0.0.1") -> bool:
+    """Checks if a network port is currently occupied."""
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.5)
+        return s.connect_ex((host, port)) == 0
+
+
+def kill_process_on_port(port: int):
+    """Terminates any stale process occupying the specified port."""
+    try:
+        out = subprocess.check_output(["lsof", "-ti", f":{port}"], text=True).strip()
+        if out:
+            for pid_str in out.split():
+                pid = int(pid_str)
+                if pid != os.getpid():
+                    try:
+                        os.kill(pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+            time.sleep(0.6)
+    except Exception:
+        pass
+
+
+@app.command()
+def start(
+    host: str = typer.Option("127.0.0.1", help="API bind host"),
+    port: int = typer.Option(8000, help="API port (default: 8000)"),
+    dashboard_port: int = typer.Option(8787, help="Dashboard port (default: 8787)"),
+    open_browser: bool = typer.Option(False, "--open", help="Open dashboard in default browser"),
+    reload: bool = typer.Option(False, "--reload", help="Enable backend hot reload"),
+):
+    """
+    Start AgentGuard locally: Backend API, MCP Gateway, and Dashboard.
+    """
+    repo_root = find_repo_root()
+    backend_dir = repo_root / "backend"
+    frontend_dir = repo_root / "frontend"
+
+    if not (backend_dir / "app" / "main.py").exists():
+        console.print(f"[red]Error: Could not locate backend at {backend_dir}[/red]")
+        raise typer.Exit(1)
+
+    npm_path = shutil.which("npm")
+    if not npm_path:
+        console.print("[red]Error: 'npm' is not installed or not in PATH.[/red]")
+        raise typer.Exit(1)
+
+    # Clean up stale processes on ports if any
+    if is_port_in_use(port, host):
+        console.print(f"[yellow]Port {port} is occupied by an earlier process. Cleaning up stale instance...[/yellow]")
+        kill_process_on_port(port)
+        time.sleep(0.5)
+
+    if is_port_in_use(dashboard_port, host):
+        console.print(f"[yellow]Port {dashboard_port} is occupied by an earlier process. Cleaning up stale instance...[/yellow]")
+        kill_process_on_port(dashboard_port)
+        time.sleep(0.5)
+
+    console.print("[dim]Starting AgentGuard local services...[/dim]")
+
+    # 1. Start Backend
+    backend_env = os.environ.copy()
+    backend_env["AGENTGUARD_ALLOWED_ORIGINS"] = (
+        f"http://localhost:{dashboard_port},http://127.0.0.1:{dashboard_port},"
+        f"http://localhost:3000,http://127.0.0.1:3000"
+    )
+    python_bin = sys.executable
+    backend_cmd = [
+        python_bin,
+        "-m",
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        host,
+        "--port",
+        str(port),
+        "--log-level",
+        "warning",
+    ]
+    if reload:
+        backend_cmd.append("--reload")
+
+    backend_proc = subprocess.Popen(
+        backend_cmd,
+        cwd=str(backend_dir),
+        env=backend_env,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    # 2. Start Frontend
+    frontend_env = os.environ.copy()
+    frontend_env["PORT"] = str(dashboard_port)
+    frontend_env["NEXT_PUBLIC_API_URL"] = f"http://{host}:{port}"
+
+    frontend_cmd = [npm_path, "run", "dev", "--", "-p", str(dashboard_port)]
+    frontend_proc = subprocess.Popen(
+        frontend_cmd,
+        cwd=str(frontend_dir),
+        env=frontend_env,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    procs = [backend_proc, frontend_proc]
+
+    def cleanup(signum=None, frame=None):
+        for p in procs:
+            try:
+                p.terminate()
+            except Exception:
+                pass
+        for p in procs:
+            try:
+                p.wait(timeout=2)
+            except Exception:
+                try:
+                    p.kill()
+                except Exception:
+                    pass
+        console.print("\n[dim]AgentGuard stopped.[/dim]")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, cleanup)
+    signal.signal(signal.SIGTERM, cleanup)
+
+    # 3. Wait for health check
+    health_url = f"http://{host}:{port}/health"
+    connected_count = 0
+    tools_count = 0
+    is_ready = False
+
+    for _ in range(50):
+        # Check if backend crashed
+        b_poll = backend_proc.poll()
+        if b_poll is not None:
+            err = backend_proc.stderr.read() if backend_proc.stderr else ""
+            console.print(f"[red]Backend failed to start (exit code {b_poll}):[/red]\n{err}")
+            cleanup()
+            raise typer.Exit(1)
+
+        f_poll = frontend_proc.poll()
+        if f_poll is not None:
+            err = frontend_proc.stderr.read() if frontend_proc.stderr else ""
+            console.print(f"[red]Frontend failed to start (exit code {f_poll}):[/red]\n{err}")
+            cleanup()
+            raise typer.Exit(1)
+
+        try:
+            r = requests.get(health_url, timeout=1.0)
+            if r.status_code == 200:
+                data = r.json()
+                connected_count = data.get("mcp_upstream_servers", 0)
+                tools_count = data.get("mcp_tools_discovered", 0)
+                is_ready = True
+                break
+        except Exception:
+            pass
+        time.sleep(0.5)
+
+    if not is_ready:
+        console.print("[yellow]Warning: Backend health check timed out, but processes were launched.[/yellow]")
+
+    # 4. Print desired banner
+    banner = f"""╭────────────────────────────────────────────╮
+│              AgentGuard                    │
+│       AI Agent Runtime Security            │
+╰────────────────────────────────────────────╯
+
+[green]✓[/green] [bold]API[/bold]          http://localhost:{port}
+[green]✓[/green] [bold]Console[/bold]      http://localhost:{dashboard_port}/app
+[green]✓[/green] [bold]MCP Gateway[/bold]  http://localhost:{port}/mcp
+
+[bold]MCP Servers[/bold]
+[green]✓[/green] {connected_count} connected
+[green]✓[/green] {tools_count} tools discovered
+
+[bold green]AgentGuard is ready.[/bold green]
+
+[bold]Local Console:[/bold]
+http://localhost:{dashboard_port}/app
+
+[dim](Press Ctrl+C to stop)[/dim]
+"""
+    console.print(banner)
+
+    if open_browser:
+        try:
+            webbrowser.open(f"http://localhost:{dashboard_port}/app")
+        except Exception:
+            pass
+
+    # Wait for processes
+    try:
+        while True:
+            time.sleep(1)
+            b_poll = backend_proc.poll()
+            if b_poll is not None:
+                err = backend_proc.stderr.read() if backend_proc.stderr else ""
+                console.print(f"\n[red]Backend process terminated (exit code {b_poll}):[/red]\n{err}")
+                cleanup()
+                break
+
+            f_poll = frontend_proc.poll()
+            if f_poll is not None:
+                err = frontend_proc.stderr.read() if frontend_proc.stderr else ""
+                console.print(f"\n[red]Frontend process terminated (exit code {f_poll}):[/red]\n{err}")
+                cleanup()
+                break
+    except KeyboardInterrupt:
+        cleanup()
 
 
 def show_dashboard():
