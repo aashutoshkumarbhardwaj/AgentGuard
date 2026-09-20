@@ -24,7 +24,7 @@ function ShellContent({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const isLanding = pathname === '/';
+  const isLanding = pathname === '/' || pathname.startsWith('/docs');
 
   if (isLanding) {
     return <>{children}</>;

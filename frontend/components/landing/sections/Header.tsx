@@ -2,29 +2,34 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ChevronRight, Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
 
 const NAV_ITEMS = [
-  { label: 'DOCS', href: '#docs' },
-  { label: 'USE-CASE', href: '#use-case' },
-  { label: 'CASE STUDIES', href: '#case-studies' },
+  { label: 'DOCS', href: '/docs' },
+  { label: 'USE-CASE', href: '/#use-case' },
+  { label: 'CASE STUDIES', href: '/#case-studies' },
 ];
 
 export function Header() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [activeNav, setActiveNav] = useState('USE-CASE');
   const [clickedNav, setClickedNav] = useState<string | null>(null);
 
+  const activeNav = pathname === '/docs' ? 'DOCS' : 'USE-CASE';
+
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, label: string, href: string) => {
-    setActiveNav(label);
     setClickedNav(label);
     setTimeout(() => setClickedNav(null), 400);
 
-    const target = document.querySelector(href);
-    if (target) {
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (href.startsWith('/#') && pathname === '/') {
+      const hash = href.replace('/', '');
+      const target = document.querySelector(hash);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
 
