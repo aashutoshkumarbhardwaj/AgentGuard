@@ -81,7 +81,9 @@ def create_gateway_server(upstream_manager: UpstreamManager) -> ll.Server:
 
 def create_gateway_http_app(upstream_manager: UpstreamManager):
     """
-    Creates a Starlette ASGI app exposing the gateway over Streamable HTTP (Phase 10).
+    Creates a Starlette ASGI app exposing the gateway over Streamable HTTP.
+    The caller is responsible for calling upstream_manager.connect_all() before
+    the first request arrives (e.g. inside a FastAPI lifespan or asynccontextmanager).
     """
     server = create_gateway_server(upstream_manager)
     return server.streamable_http_app()
@@ -104,8 +106,49 @@ async def run_stdio(upstream_manager: Optional[UpstreamManager] = None):
             await server.run(read_stream, write_stream, init_options)
 
 
-if __name__ == "__main__":
+async def run_http(host: str = "0.0.0.0", port: int = 8001):
+    """
+    Standalone HTTP entry point for the MCP gateway (local dev / Docker sidecar).
+    For production, the gateway is mounted into the FastAPI app at /mcp.
+    """
+    import uvicorn
+
+    configs = load_upstream_config()
+    upstream_manager = UpstreamManager(configs)
+    await upstream_manager.connect_all()
+    logger.info(
+        f"AgentGuard MCP Gateway connected to {len(upstream_manager.sessions)} upstream server(s)."
+    )
+
+    http_app = create_gateway_http_app(upstream_manager)
+
+    config = uvicorn.Config(http_app, host=host, port=port, log_level="info")
+    server = uvicorn.Server(config)
+
     try:
-        asyncio.run(run_stdio())
+        await server.serve()
+    finally:
+        await upstream_manager.close()
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="AgentGuard MCP Gateway")
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "http"],
+        default="stdio",
+        help="Transport mode: stdio (default) or http",
+    )
+    parser.add_argument("--host", default="0.0.0.0", help="HTTP host (http mode only)")
+    parser.add_argument("--port", type=int, default=8001, help="HTTP port (http mode only)")
+    args = parser.parse_args()
+
+    try:
+        if args.transport == "http":
+            asyncio.run(run_http(host=args.host, port=args.port))
+        else:
+            asyncio.run(run_stdio())
     except (KeyboardInterrupt, anyio.get_cancelled_exc_class()):
         pass

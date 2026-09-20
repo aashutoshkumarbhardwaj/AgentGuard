@@ -44,6 +44,14 @@
         {
           "name": "AGENTGUARD_ALLOWED_ORIGINS",
           "value": "${AGENTGUARD_ALLOWED_ORIGINS}"
+        },
+        {
+          "name": "MCP_CONFIG_PATH",
+          "value": "/data/mcp_servers.json"
+        },
+        {
+          "name": "AGENTGUARD_ENV",
+          "value": "production"
         }
       ],
       "mountPoints": [
