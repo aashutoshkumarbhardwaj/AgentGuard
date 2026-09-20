@@ -26,6 +26,8 @@ def clean_env():
     for k, v in old_vars.items():
         if v is not None:
             os.environ[k] = v
+        elif k in os.environ:
+            del os.environ[k]
 
 def test_init_with_env_vars(clean_env):
     os.environ["AGENTGUARD_AGENT_ID"] = "env-agent"
