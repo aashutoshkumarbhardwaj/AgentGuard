@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Mail, FileText, Shield, Check } from 'lucide-react';
+import { Calendar, Mail, FileText, Shield, Check, ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LiquidBentoCard } from './liquid-bento-card';
+import { CardSpotlight } from '@/components/ui/card-spotlight';
 
 interface Tool {
   id: string;
@@ -12,25 +12,28 @@ interface Tool {
   icon: typeof Calendar;
   calls: number;
   lastRequest: string;
+  category: string;
 }
 
 const tools: Tool[] = [
-  { id: 'calendar', name: 'Calendar', icon: Calendar, calls: 4821, lastRequest: '2s ago' },
-  { id: 'email', name: 'Email', icon: Mail, calls: 2156, lastRequest: '5s ago' },
-  { id: 'file', name: 'Files', icon: FileText, calls: 1515, lastRequest: '1s ago' },
+  { id: 'calendar', name: 'Calendar MCP', icon: Calendar, calls: 4821, lastRequest: '2s ago', category: 'Time & Scheduling' },
+  { id: 'email', name: 'Email MCP', icon: Mail, calls: 2156, lastRequest: '5s ago', category: 'Communications' },
+  { id: 'file', name: 'Filesystem MCP', icon: FileText, calls: 1515, lastRequest: '1s ago', category: 'Local Storage' },
 ];
 
 export function ProtectedTools() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <LiquidBentoCard className="p-5" glowColor="rgba(16, 185, 129, 0.08)">
-      <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/[0.06]">
+    <CardSpotlight className="p-5 rounded-2xl bg-[#0a0c10]/95 border border-white/[0.08] hover:border-white/[0.16] transition-all duration-300 font-memorable">
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-emerald-400" />
-          <h2 className="text-[13px] font-semibold text-white tracking-tight">Protected Tools</h2>
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+            <Shield className="w-3.5 h-3.5 text-emerald-400" />
+          </div>
+          <h2 className="text-[13.5px] font-semibold text-white tracking-tight">Protected Tools</h2>
         </div>
-        <span className="text-[11px] text-white/40 font-mono">3 active</span>
+        <span className="text-[11px] text-zinc-400 font-medium">3 active endpoints</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -43,54 +46,40 @@ export function ProtectedTools() {
               onMouseEnter={() => setHovered(tool.id)}
               onMouseLeave={() => setHovered(null)}
               className={cn(
-                'group relative rounded-xl border p-3.5 transition-all duration-300 cursor-pointer overflow-hidden',
+                'group relative rounded-xl border p-4 transition-all duration-300 cursor-pointer overflow-hidden',
                 isHovered
-                  ? 'border-emerald-500/30 bg-emerald-950/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+                  ? 'border-white/[0.2] bg-white/[0.05] shadow-lg'
                   : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]'
               )}
             >
-              {/* Hover connection highlight */}
-              {isHovered && (
-                <div className="absolute -top-px left-0 h-px w-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
-              )}
-              <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center justify-between mb-3">
                 <div
                   className={cn(
                     'flex h-8 w-8 items-center justify-center rounded-lg border transition-colors',
                     isHovered
-                      ? 'border-emerald-500/40 bg-emerald-500/15'
-                      : 'border-white/[0.08] bg-white/[0.04]'
+                      ? 'border-white/20 bg-white/10 text-white'
+                      : 'border-white/[0.08] bg-white/[0.04] text-zinc-400'
                   )}
                 >
-                  <Icon
-                    className={cn(
-                      'h-4 w-4 transition-colors',
-                      isHovered ? 'text-emerald-400' : 'text-zinc-400'
-                    )}
-                  />
+                  <Icon className="h-4 w-4" />
                 </div>
-                <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-mono font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                   <Check className="h-2.5 w-2.5" strokeWidth={3} />
                   <span>Protected</span>
                 </div>
               </div>
               <p className="text-[13.5px] font-semibold text-white tracking-tight">{tool.name}</p>
-              <p className="text-[11px] text-white/50 font-mono mt-0.5 tabular-nums">
-                {tool.calls.toLocaleString()} calls
+              <p className="text-[11px] text-zinc-400 mt-0.5 font-normal">
+                {tool.category}
               </p>
-              <p className="text-[10px] text-white/35 font-mono mt-0.5">{tool.lastRequest}</p>
-
-              {/* Hover telemetry label */}
-              {isHovered && (
-                <div className="mt-2.5 flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 pt-1.5 border-t border-emerald-500/20">
-                  <Shield className="h-2.5 w-2.5" />
-                  <span>Routed via AgentGuard</span>
-                </div>
-              )}
+              <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex items-center justify-between text-[11px]">
+                <span className="text-zinc-300 font-medium">{tool.calls.toLocaleString()} calls</span>
+                <span className="text-zinc-500">{tool.lastRequest}</span>
+              </div>
             </div>
           );
         })}
       </div>
-    </LiquidBentoCard>
+    </CardSpotlight>
   );
 }
