@@ -13,6 +13,7 @@ import {
   WorkflowSection,
   AgentTypesSection,
   CaseStudiesSection,
+  GeminiAnimationSection,
   TestimonialsSection,
   BenchmarksSection,
   PreFooterTalk,
@@ -41,6 +42,7 @@ export function LandingPage() {
       <BenchmarksSection />
       <PreFooterTalk />
       <CaseStudiesSection />
+      <GeminiAnimationSection />
       <TestimonialsSection />
       <FooterCta />
       <span data-spark className="landing-spark landing-spark-one" aria-hidden="true"><Sparkles className="h-3 w-3" /></span>

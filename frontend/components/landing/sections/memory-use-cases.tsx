@@ -302,7 +302,7 @@ export function MemoryUseCases() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="memorable-section-root">
+    <section id="use-case" ref={sectionRef} className="memorable-section-root">
       <div className="memorable-section-grid">
         
         {/* Left Column: Terminal with Image Mesh + Ripple Effect */}

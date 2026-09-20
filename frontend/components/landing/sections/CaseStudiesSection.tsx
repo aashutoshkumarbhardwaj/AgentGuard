@@ -155,6 +155,7 @@ export function CaseStudiesSection() {
 
   return (
     <section
+      id="case-studies"
       ref={sectionRef}
       className="relative w-full bg-black py-24 sm:py-32 overflow-hidden border-t border-white/[0.06]"
     >

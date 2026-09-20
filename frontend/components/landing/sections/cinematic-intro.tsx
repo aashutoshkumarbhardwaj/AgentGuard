@@ -100,7 +100,7 @@ export function CinematicIntro() {
   }, []);
 
   return (
-    <section ref={containerRef} className="landing-cinematic-container">
+    <section id="docs" ref={containerRef} className="landing-cinematic-container">
       <div ref={canvasWrapperRef} className="landing-cinematic-webgl">
         <Canvas camera={{ position: [0, 0, 1] }}>
           <Particles />
