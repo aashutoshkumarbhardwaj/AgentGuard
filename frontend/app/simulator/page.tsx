@@ -5,11 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { gsap } from 'gsap';
 import {
   Swords, Play, RotateCcw, Check, X, AlertTriangle, Shield,
-  Fingerprint, Lock, ScanSearch, Gauge, FileText, Ban, ChevronRight,
+  Fingerprint, Lock, ScanSearch, Gauge, FileText, Ban, ChevronRight, Activity,
 } from 'lucide-react';
 import { attackScenarios } from '@/lib/mock-data';
+import { executeAgentAction, type SecurityDecision } from '@/lib/api';
 import { DecisionBadge } from '@/components/dashboard/decision-badge';
 import { RiskGauge } from '@/components/dashboard/risk-gauge';
+import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import { cn } from '@/lib/utils';
 
 const stepIcons = [Fingerprint, Lock, ScanSearch, Gauge, FileText];
@@ -29,6 +31,7 @@ export default function SimulatorPage() {
   const [completed, setCompleted] = useState(false);
   const [activeStep, setActiveStep] = useState(-1);
   const [evaluating, setEvaluating] = useState(false);
+  const [liveResult, setLiveResult] = useState<SecurityDecision | null>(null);
   const pipelineRef = useRef<HTMLDivElement>(null);
   const particleRef = useRef<HTMLDivElement>(null);
 
@@ -37,17 +40,41 @@ export default function SimulatorPage() {
     setCompleted(false);
     setActiveStep(-1);
     setEvaluating(false);
+    setLiveResult(null);
 
-    attackScenarios[0].steps.forEach((_, i) => {
+    // Call live backend in parallel
+    const tool = (selectedAttack as any).tool || selectedAttack.action.split('.')[0];
+    const action = (selectedAttack as any).operation || selectedAttack.action.split('.')[1] || 'read';
+    const args = (selectedAttack as any).arguments || {};
+    const context = (selectedAttack as any).context || {};
+
+    const apiPromise = executeAgentAction({
+      agent_id: selectedAttack.agentId,
+      user_id: 'user-001',
+      tool,
+      action,
+      arguments: args,
+      context,
+    }).catch((err) => {
+      console.warn('Backend call failed, using simulation signals', err);
+      return null;
+    });
+
+    selectedAttack.steps.forEach((_, i) => {
       setTimeout(() => {
         setActiveStep(i);
         if (i === 1) setEvaluating(true);
         if (i >= 2) setEvaluating(false);
-        if (i === attackScenarios[0].steps.length - 1) {
-          setTimeout(() => {
-            setRunning(false);
-            setCompleted(true);
-          }, 800);
+        if (i === selectedAttack.steps.length - 1) {
+          apiPromise.then((res) => {
+            if (res) {
+              setLiveResult(res);
+            }
+            setTimeout(() => {
+              setRunning(false);
+              setCompleted(true);
+            }, 800);
+          });
         }
       }, 700 * (i + 1));
     });
@@ -164,15 +191,18 @@ export default function SimulatorPage() {
               <pre className="text-[13px] font-mono whitespace-pre-wrap text-muted-foreground/80">{selectedAttack.input}</pre>
             </div>
             <div className="mt-4 flex items-center gap-3">
-              <button
-                onClick={running ? undefined : runAttack}
-                disabled={running}
+              <HoverBorderGradient
+                as="button"
+                containerClassName="rounded-xl"
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors',
+                  'flex items-center gap-2 px-4 py-2 text-[13px] font-semibold transition-colors',
                   running
                     ? 'bg-muted/40 text-muted-foreground cursor-not-allowed'
-                    : 'bg-danger text-destructive-foreground hover:bg-danger/80'
+                    : 'bg-rose-600 text-white shadow-[0_0_15px_rgba(225,29,72,0.35)]'
                 )}
+                highlight="radial-gradient(75% 181% at 50% 50%, #f43f5e 0%, rgba(255, 255, 255, 0) 100%)"
+                onClick={running ? undefined : runAttack}
+                disabled={running}
               >
                 {running ? (
                   <>
@@ -188,14 +218,17 @@ export default function SimulatorPage() {
                     <Play className="h-3.5 w-3.5" /> Run Attack
                   </>
                 )}
-              </button>
+              </HoverBorderGradient>
               {(completed || running) && (
-                <button
+                <HoverBorderGradient
+                  as="button"
+                  containerClassName="rounded-xl"
+                  className="flex items-center gap-2 px-3.5 py-2 text-[13px] bg-[#090b12] text-muted-foreground hover:text-foreground transition-colors"
+                  highlight="radial-gradient(75% 181% at 50% 50%, #38bdf8 0%, rgba(255, 255, 255, 0) 100%)"
                   onClick={reset}
-                  className="flex items-center gap-2 rounded-lg border border-border/40 px-3.5 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <RotateCcw className="h-3.5 w-3.5" /> Reset
-                </button>
+                </HoverBorderGradient>
               )}
             </div>
           </div>
@@ -351,32 +384,69 @@ export default function SimulatorPage() {
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: completed ? '20px' : '14px', opacity: 1 }}
-                      className={cn('w-px', completed ? 'bg-danger/30' : 'bg-border/50')}
+                      className={cn(
+                        'w-px',
+                        completed
+                          ? (liveResult?.decision || selectedAttack.finalDecision) === 'ALLOW'
+                            ? 'bg-success/30'
+                            : (liveResult?.decision || selectedAttack.finalDecision) === 'APPROVE'
+                            ? 'bg-warning/30'
+                            : 'bg-danger/30'
+                          : 'bg-border/50'
+                      )}
                     />
                   </div>
                   <AnimatePresence>
-                    {completed && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.92 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                        className="flex items-center justify-center gap-3 rounded-xl border border-danger/40 bg-danger/10 p-4"
-                      >
+                    {completed && (() => {
+                      const dec = liveResult?.decision || selectedAttack.finalDecision;
+                      const isAllowed = dec === 'ALLOW';
+                      const isApprove = dec === 'APPROVE';
+
+                      return (
                         <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.1, type: 'spring', stiffness: 300 }}
+                          initial={{ opacity: 0, scale: 0.92 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                          className={cn(
+                            'flex items-center justify-center gap-3 rounded-xl border p-4',
+                            isAllowed
+                              ? 'border-success/40 bg-success/10'
+                              : isApprove
+                              ? 'border-warning/40 bg-warning/10'
+                              : 'border-danger/40 bg-danger/10'
+                          )}
                         >
-                          <Ban className="h-5 w-5 text-danger" />
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.1, type: 'spring', stiffness: 300 }}
+                          >
+                            {isAllowed ? (
+                              <Check className="h-5 w-5 text-success" />
+                            ) : isApprove ? (
+                              <AlertTriangle className="h-5 w-5 text-warning" />
+                            ) : (
+                              <Ban className="h-5 w-5 text-danger" />
+                            )}
+                          </motion.div>
+                          <div className="text-center">
+                            <p className={cn(
+                              'text-[18px] font-bold uppercase tracking-wider',
+                              isAllowed ? 'text-success' : isApprove ? 'text-warning' : 'text-danger'
+                            )}>
+                              {isAllowed ? 'Allowed' : isApprove ? 'Approval Required' : 'Blocked'}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground/60 mt-0.5">
+                              {isAllowed
+                                ? 'Safe operation — tool executed'
+                                : isApprove
+                                ? 'Escalated to human supervisor — tool not yet executed'
+                                : 'Action stopped — tool NEVER executed'}
+                            </p>
+                          </div>
                         </motion.div>
-                        <div className="text-center">
-                          <p className="text-[18px] font-bold text-danger uppercase tracking-wider">Blocked</p>
-                          <p className="text-[11px] text-muted-foreground/60 mt-0.5">
-                            Action stopped — threat neutralized
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
+                      );
+                    })()}
                   </AnimatePresence>
                 </div>
               </motion.div>
@@ -385,38 +455,57 @@ export default function SimulatorPage() {
 
           {/* Risk summary */}
           <AnimatePresence>
-            {completed && (
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="grid gap-3 sm:grid-cols-2"
-              >
-                <div className="rounded-xl border border-border/40 surface-card p-4">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-3">Risk Assessment</p>
-                  <RiskGauge score={selectedAttack.riskScore} level={selectedAttack.riskLevel} />
-                </div>
-                <div className="rounded-xl border border-border/40 surface-card p-4">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-3">Final Decision</p>
-                  <div className="flex items-center gap-3">
-                    <DecisionBadge decision={selectedAttack.finalDecision} size="lg" />
+            {completed && (() => {
+              const dec = liveResult?.decision || selectedAttack.finalDecision;
+              const score = liveResult?.risk_score ?? selectedAttack.riskScore;
+              const level = (liveResult?.risk_level || selectedAttack.riskLevel) as any;
+              const executionStatus = liveResult?.status || (dec === 'ALLOW' ? 'EXECUTED' : dec === 'APPROVE' ? 'PENDING' : 'BLOCKED');
+              const bedrockSignal = liveResult?.bedrock;
+
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="grid gap-3 sm:grid-cols-2"
+                >
+                  <div className="rounded-xl border border-border/40 surface-card p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-3">Risk Assessment</p>
+                    <RiskGauge score={score} level={level} />
                   </div>
-                  <div className="mt-3 space-y-1.5">
-                    <div className="flex items-center justify-between text-[12px]">
-                      <span className="text-muted-foreground/60">Policy</span>
-                      <span className="font-mono text-danger text-[11px]">DENY</span>
+                  <div className="rounded-xl border border-border/40 surface-card p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-3">Final Decision</p>
+                    <div className="flex items-center gap-3">
+                      <DecisionBadge decision={dec} size="lg" />
                     </div>
-                    <div className="flex items-center justify-between text-[12px]">
-                      <span className="text-muted-foreground/60">Audit Event</span>
-                      <span className="font-mono text-success text-[11px]">Recorded</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[12px]">
-                      <span className="text-muted-foreground/60">Hash Chain</span>
-                      <span className="font-mono text-success text-[11px]">Updated</span>
+                    <div className="mt-3 space-y-1.5">
+                      <div className="flex items-center justify-between text-[12px]">
+                        <span className="text-muted-foreground/60">Execution</span>
+                        <span className={cn(
+                          'font-mono text-[11px]',
+                          dec === 'ALLOW' ? 'text-success' : 'text-danger'
+                        )}>
+                          {dec === 'ALLOW' ? 'EXECUTED' : 'NEVER EXECUTED'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[12px]">
+                        <span className="text-muted-foreground/60">Bedrock Signal</span>
+                        <span className="font-mono text-muted-foreground text-[11px]">
+                          {bedrockSignal?.prompt_attack_detected ? 'ATTACK' : bedrockSignal?.sensitive_information_detected ? 'PII' : 'PASS'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[12px]">
+                        <span className="text-muted-foreground/60">Audit Event</span>
+                        <span className="font-mono text-success text-[11px]">Recorded</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[12px]">
+                        <span className="text-muted-foreground/60">Hash Chain</span>
+                        <span className="font-mono text-success text-[11px]">Updated</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              );
+            })()}
           </AnimatePresence>
         </div>
       </div>

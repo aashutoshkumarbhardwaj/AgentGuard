@@ -94,6 +94,7 @@ def approve_approval(approval_id: str):
         policy_id=decision["policy_id"],
         reason=decision["reason"],
         factors=decision.get("factors", []),
+        bedrock=decision.get("bedrock", {})
     )
 
     # Security can change between approval creation

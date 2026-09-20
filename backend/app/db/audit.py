@@ -17,22 +17,29 @@ def init_audit_db():
             policy_id TEXT NOT NULL,
             reason TEXT NOT NULL,
             factors TEXT NOT NULL,
+            bedrock TEXT,
             previous_hash TEXT NOT NULL,
             event_hash TEXT NOT NULL
         )
     """)
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(audit_logs)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if "bedrock" not in columns:
+        conn.execute("ALTER TABLE audit_logs ADD COLUMN bedrock TEXT")
     conn.commit()
     conn.close()
 
 def insert_audit_log(event: dict) -> dict:
     conn = get_connection()
     cursor = conn.cursor()
+    bedrock_data = json.dumps(event["bedrock"]) if "bedrock" in event and event["bedrock"] is not None else None
     cursor.execute("""
         INSERT INTO audit_logs (
             timestamp, agent_id, user_id, tool, action, decision,
             risk_level, risk_score, policy_id, reason, factors,
-            previous_hash, event_hash
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            bedrock, previous_hash, event_hash
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         event["timestamp"],
         event["agent_id"],
@@ -45,6 +52,7 @@ def insert_audit_log(event: dict) -> dict:
         event["policy_id"],
         event["reason"],
         json.dumps(event["factors"]),
+        bedrock_data,
         event["previous_hash"],
         event["event_hash"]
     ))
@@ -63,7 +71,8 @@ def get_all_audit_logs() -> list:
     
     result = []
     for row in rows:
-        result.append({
+        row_keys = row.keys()
+        item = {
             "event_id": row["event_id"],
             "timestamp": row["timestamp"],
             "agent_id": row["agent_id"],
@@ -76,9 +85,15 @@ def get_all_audit_logs() -> list:
             "policy_id": row["policy_id"],
             "reason": row["reason"],
             "factors": json.loads(row["factors"]),
-            "previous_hash": row["previous_hash"],
-            "event_hash": row["event_hash"],
-        })
+        }
+        if "bedrock" in row_keys and row["bedrock"]:
+            try:
+                item["bedrock"] = json.loads(row["bedrock"])
+            except Exception:
+                pass
+        item["previous_hash"] = row["previous_hash"]
+        item["event_hash"] = row["event_hash"]
+        result.append(item)
     return result
 
 def get_last_audit_log() -> dict:
@@ -88,8 +103,9 @@ def get_last_audit_log() -> dict:
     
     if not row:
         return None
-        
-    return {
+
+    row_keys = row.keys()
+    item = {
         "event_id": row["event_id"],
         "timestamp": row["timestamp"],
         "agent_id": row["agent_id"],
@@ -102,6 +118,12 @@ def get_last_audit_log() -> dict:
         "policy_id": row["policy_id"],
         "reason": row["reason"],
         "factors": json.loads(row["factors"]),
-        "previous_hash": row["previous_hash"],
-        "event_hash": row["event_hash"],
     }
+    if "bedrock" in row_keys and row["bedrock"]:
+        try:
+            item["bedrock"] = json.loads(row["bedrock"])
+        except Exception:
+            pass
+    item["previous_hash"] = row["previous_hash"]
+    item["event_hash"] = row["event_hash"]
+    return item

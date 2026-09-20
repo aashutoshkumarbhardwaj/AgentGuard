@@ -7,11 +7,14 @@ import { Topbar } from '@/components/layout/topbar';
 import { CommandPalette } from '@/components/layout/command-palette';
 import { ActionInspector } from '@/components/dashboard/action-inspector';
 import { EventProvider, useEventInspector } from '@/components/providers/event-provider';
+import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 function ShellContent({ children }: { children: React.ReactNode }) {
   const [commandOpen, setCommandOpen] = useState(false);
   const pathname = usePathname();
   const { activeEventId, closeInspector } = useEventInspector();
+  const { open } = useSidebar();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -37,7 +40,12 @@ function ShellContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-mesh">
       <Sidebar />
-      <div className="pl-[220px]">
+      <div
+        className={cn(
+          'transition-[padding] duration-300 ease-in-out pl-0',
+          open ? 'md:pl-[240px]' : 'md:pl-[64px]'
+        )}
+      >
         <Topbar onOpenCommand={() => setCommandOpen(true)} />
         <main key={pathname} className="slide-in-top p-5 lg:p-6">
           <div className="mx-auto max-w-6xl">
@@ -57,8 +65,10 @@ function ShellContent({ children }: { children: React.ReactNode }) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <EventProvider>
-      <ShellContent>{children}</ShellContent>
-    </EventProvider>
+    <SidebarProvider defaultOpen={true} animate={true}>
+      <EventProvider>
+        <ShellContent>{children}</ShellContent>
+      </EventProvider>
+    </SidebarProvider>
   );
 }

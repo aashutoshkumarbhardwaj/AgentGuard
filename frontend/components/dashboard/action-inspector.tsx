@@ -10,6 +10,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import {
   Shield,
   ShieldAlert,
@@ -176,8 +177,22 @@ export function ActionInspector({ eventId, open, onOpenChange }: ActionInspector
             {/* Actions */}
             {event.decision === 'APPROVE' && (
               <div className="flex gap-2 pt-2">
-                <Button variant="destructive" className="flex-1">Block</Button>
-                <Button className="flex-1 bg-success text-success-foreground hover:bg-success/80">Approve</Button>
+                <HoverBorderGradient
+                  as="button"
+                  containerClassName="rounded-xl flex-1 w-full"
+                  className="w-full bg-[#18080a] text-rose-300 hover:text-rose-200 text-xs font-mono font-semibold py-2 flex items-center justify-center"
+                  highlight="radial-gradient(75% 181% at 50% 50%, #f43f5e 0%, rgba(255, 255, 255, 0) 100%)"
+                >
+                  Block
+                </HoverBorderGradient>
+                <HoverBorderGradient
+                  as="button"
+                  containerClassName="rounded-xl flex-1 w-full"
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-mono font-bold py-2 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.35)]"
+                  highlight="radial-gradient(75% 181% at 50% 50%, #10b981 0%, rgba(255, 255, 255, 0) 100%)"
+                >
+                  Approve
+                </HoverBorderGradient>
               </div>
             )}
           </div>

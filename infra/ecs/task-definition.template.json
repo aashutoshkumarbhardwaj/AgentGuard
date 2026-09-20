@@ -1,0 +1,86 @@
+{
+  "family": "agentguard-backend",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/AgentGuardECSTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/AgentGuardECSTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "agentguard-api",
+      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/agentguard-backend:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "AWS_REGION",
+          "value": "${AWS_REGION}"
+        },
+        {
+          "name": "BEDROCK_GUARDRAIL_ID",
+          "value": "${BEDROCK_GUARDRAIL_ID}"
+        },
+        {
+          "name": "BEDROCK_GUARDRAIL_VERSION",
+          "value": "${BEDROCK_GUARDRAIL_VERSION}"
+        },
+        {
+          "name": "BEDROCK_REQUIRED",
+          "value": "${BEDROCK_REQUIRED}"
+        },
+        {
+          "name": "AGENTGUARD_DB",
+          "value": "/data/agentguard.db"
+        },
+        {
+          "name": "AGENTGUARD_ALLOWED_ORIGINS",
+          "value": "${AGENTGUARD_ALLOWED_ORIGINS}"
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "agentguard-efs-storage",
+          "containerPath": "/data",
+          "readOnly": false
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/agentguard-backend",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8000/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 15
+      }
+    }
+  ],
+  "volumes": [
+    {
+      "name": "agentguard-efs-storage",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "${EFS_FILE_SYSTEM_ID}",
+        "rootDirectory": "/",
+        "transitEncryption": "ENABLED"
+      }
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Mail, FileText, Shield, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LiquidBentoCard } from './liquid-bento-card';
 
 interface Tool {
   id: string;
@@ -23,71 +24,73 @@ export function ProtectedTools() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <div className="rounded-xl border border-border/40 surface-card p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[13px] font-semibold">Protected Tools</h2>
-        <span className="text-[10px] text-muted-foreground/40 font-mono">3 active</span>
+    <LiquidBentoCard className="p-5" glowColor="rgba(16, 185, 129, 0.08)">
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/[0.06]">
+        <div className="flex items-center gap-2">
+          <Shield className="w-4 h-4 text-emerald-400" />
+          <h2 className="text-[13px] font-semibold text-white tracking-tight">Protected Tools</h2>
+        </div>
+        <span className="text-[11px] text-white/40 font-mono">3 active</span>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {tools.map((tool) => {
           const Icon = tool.icon;
           const isHovered = hovered === tool.id;
           return (
-            <motion.div
+            <div
               key={tool.id}
-              onHoverStart={() => setHovered(tool.id)}
-              onHoverEnd={() => setHovered(null)}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              onMouseEnter={() => setHovered(tool.id)}
+              onMouseLeave={() => setHovered(null)}
               className={cn(
-                'group relative rounded-lg border p-3 transition-all duration-200 cursor-pointer',
+                'group relative rounded-xl border p-3.5 transition-all duration-300 cursor-pointer overflow-hidden',
                 isHovered
-                  ? 'border-primary/30 bg-primary/[0.04]'
-                  : 'border-border/40 bg-muted/10'
+                  ? 'border-emerald-500/30 bg-emerald-950/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+                  : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]'
               )}
             >
-              {/* Hover connection indicator */}
+              {/* Hover connection highlight */}
               {isHovered && (
-                <motion.div
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: '100%' }}
-                  className="absolute -top-px left-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
-                />
+                <div className="absolute -top-px left-0 h-px w-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
               )}
-              <div className="flex items-center justify-between mb-2">
-                <div className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-lg border transition-colors',
-                  isHovered ? 'border-primary/30 bg-primary/10' : 'border-border/40 bg-muted/20'
-                )}>
-                  <Icon className={cn('h-4 w-4 transition-colors', isHovered ? 'text-primary' : 'text-muted-foreground/60')} />
+              <div className="flex items-center justify-between mb-2.5">
+                <div
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-lg border transition-colors',
+                    isHovered
+                      ? 'border-emerald-500/40 bg-emerald-500/15'
+                      : 'border-white/[0.08] bg-white/[0.04]'
+                  )}
+                >
+                  <Icon
+                    className={cn(
+                      'h-4 w-4 transition-colors',
+                      isHovered ? 'text-emerald-400' : 'text-zinc-400'
+                    )}
+                  />
                 </div>
-                <div className="flex items-center gap-1 text-[10px] text-success">
+                <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-mono font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                   <Check className="h-2.5 w-2.5" strokeWidth={3} />
-                  <span className="font-medium">Protected</span>
+                  <span>Protected</span>
                 </div>
               </div>
-              <p className="text-[13px] font-medium">{tool.name}</p>
-              <p className="text-[11px] text-muted-foreground/50 font-mono mt-0.5 tabular-nums">
+              <p className="text-[13.5px] font-semibold text-white tracking-tight">{tool.name}</p>
+              <p className="text-[11px] text-white/50 font-mono mt-0.5 tabular-nums">
                 {tool.calls.toLocaleString()} calls
               </p>
-              <p className="text-[10px] text-muted-foreground/30 mt-0.5">{tool.lastRequest}</p>
+              <p className="text-[10px] text-white/35 font-mono mt-0.5">{tool.lastRequest}</p>
 
-              {/* Hover: protected by AgentGuard */}
+              {/* Hover telemetry label */}
               {isHovered && (
-                <motion.div
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-2 flex items-center gap-1 text-[10px] text-primary"
-                >
+                <div className="mt-2.5 flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 pt-1.5 border-t border-emerald-500/20">
                   <Shield className="h-2.5 w-2.5" />
                   <span>Routed via AgentGuard</span>
-                </motion.div>
+                </div>
               )}
-            </motion.div>
+            </div>
           );
         })}
       </div>
-    </div>
+    </LiquidBentoCard>
   );
 }

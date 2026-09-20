@@ -44,6 +44,22 @@ export function CinematicIntro() {
     let ctx = gsap.context(() => {
       const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+      // Set initial states explicitly to guarantee stability on refresh
+      gsap.set(scene1Ref.current, {
+        opacity: 1,
+        scale: 1,
+        z: 0,
+        zIndex: 2,
+        pointerEvents: 'auto',
+      });
+      gsap.set(scene2Ref.current, {
+        opacity: 0,
+        scale: 0.2,
+        z: 1200,
+        zIndex: 1,
+        pointerEvents: 'none',
+      });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
@@ -51,10 +67,26 @@ export function CinematicIntro() {
           end: '+=1800',
           scrub: 1,
           pin: true,
+          invalidateOnRefresh: true,
           snap: {
             snapTo: [0, 1],
             duration: { min: 0.25, max: 0.7 },
             ease: "power2.inOut"
+          },
+          onUpdate: (self) => {
+            if (scene1Ref.current && scene2Ref.current) {
+              if (self.progress > 0.4) {
+                scene1Ref.current.style.pointerEvents = 'none';
+                scene2Ref.current.style.pointerEvents = 'auto';
+                scene2Ref.current.style.zIndex = '3';
+                scene1Ref.current.style.zIndex = '1';
+              } else {
+                scene1Ref.current.style.pointerEvents = 'auto';
+                scene2Ref.current.style.pointerEvents = 'none';
+                scene1Ref.current.style.zIndex = '2';
+                scene2Ref.current.style.zIndex = '1';
+              }
+            }
           }
         }
       });
@@ -94,6 +126,8 @@ export function CinematicIntro() {
           duration: 0.5
         }, 0.8);
       }
+
+      ScrollTrigger.refresh();
     }, containerRef);
 
     return () => ctx.revert();
@@ -108,11 +142,15 @@ export function CinematicIntro() {
       </div>
 
       <div className="landing-cinematic-perspective">
-        <div ref={scene1Ref} className="landing-scene-layer">
+        <div ref={scene1Ref} className="landing-scene-layer landing-scene-1">
           <Scene1 />
         </div>
         
-        <div ref={scene2Ref} className="landing-scene-layer">
+        <div
+          ref={scene2Ref}
+          className="landing-scene-layer landing-scene-2"
+          style={{ opacity: 0, pointerEvents: 'none' }}
+        >
           <Scene2 />
         </div>
       </div>

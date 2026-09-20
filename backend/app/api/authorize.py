@@ -63,7 +63,8 @@ def authorize(request: AuthorizationRequest):
         risk_score=result["risk_score"],
         policy_id=result["policy_id"],
         reason=result["reason"],
-        factors=result.get("factors", [])
+        factors=result.get("factors", []),
+        bedrock=result.get("bedrock", {})
     )
 
     return {
@@ -85,6 +86,7 @@ def authorize(request: AuthorizationRequest):
 
         "authorization": result.get("authorization", {}),
         "security": result.get("security", {}),
+        "bedrock": result.get("bedrock", {}),
 
         "reason": result["reason"]
     }

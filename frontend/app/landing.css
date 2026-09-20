@@ -1497,6 +1497,18 @@ body::-webkit-scrollbar,
   will-change: transform, opacity;
 }
 
+.landing-scene-layer.landing-scene-1 {
+  z-index: 2;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.landing-scene-layer.landing-scene-2 {
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Scene 1 — Video Hero (matching screenshot) -------------------------------- */
 
 .scene1-root {

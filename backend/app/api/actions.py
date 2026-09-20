@@ -23,17 +23,18 @@ def agent_action(request: ActionRequest):
         user_id=request.user_id
     )
     record_event(
-    agent_id=request.agent_id,
-    user_id=request.user_id,
-    tool=request.tool,
-    action=request.action,
-    decision=decision["decision"],
-    risk_level=decision["risk_level"],
-    risk_score=decision["risk_score"],
-    policy_id=decision["policy_id"],
-    reason=decision["reason"],
-    factors=decision.get("factors", [])
-)
+        agent_id=request.agent_id,
+        user_id=request.user_id,
+        tool=request.tool,
+        action=request.action,
+        decision=decision["decision"],
+        risk_level=decision["risk_level"],
+        risk_score=decision["risk_score"],
+        policy_id=decision["policy_id"],
+        reason=decision["reason"],
+        factors=decision.get("factors", []),
+        bedrock=decision.get("bedrock", {})
+    )
 
     # BLOCK → tool never executes
     if decision["decision"] == "BLOCK":

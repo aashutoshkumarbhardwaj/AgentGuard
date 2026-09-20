@@ -1,6 +1,5 @@
 import re
 import sys
-from transformers import pipeline
 
 
 # --------------------------------------------------
@@ -34,16 +33,21 @@ def get_ml_detector():
     global _ml_detector
 
     if _ml_detector is None:
-        print("[AgentGuard] Loading prompt injection ML model...", file=sys.stderr)
+        try:
+            from transformers import pipeline
+            print("[AgentGuard] Loading prompt injection ML model...", file=sys.stderr)
 
-        _ml_detector = pipeline(
-            "text-classification",
-            model="protectai/deberta-v3-base-prompt-injection-v2",
-            max_length=512,
-            truncation=True,
-        )
+            _ml_detector = pipeline(
+                "text-classification",
+                model="protectai/deberta-v3-base-prompt-injection-v2",
+                max_length=512,
+                truncation=True,
+            )
 
-        print("[AgentGuard] ML detector loaded.", file=sys.stderr)
+            print("[AgentGuard] ML detector loaded.", file=sys.stderr)
+        except Exception as e:
+            print(f"[AgentGuard] Could not load transformers ML model: {e}", file=sys.stderr)
+            raise
 
     return _ml_detector
 

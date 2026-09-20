@@ -24,7 +24,8 @@ def record_event(
     risk_score: int,
     policy_id: str,
     reason: str,
-    factors: list
+    factors: list,
+    bedrock: dict = None
 ):
     last_event = get_last_audit_log()
     previous_hash = (
@@ -45,9 +46,16 @@ def record_event(
         "policy_id": policy_id,
         "reason": reason,
         "factors": factors,
-        "previous_hash": previous_hash
     }
 
+    if bedrock is not None:
+        event["bedrock"] = {
+            "available": bool(bedrock.get("available", False)),
+            "prompt_attack_detected": bool(bedrock.get("prompt_attack_detected", False)),
+            "sensitive_information_detected": bool(bedrock.get("sensitive_information_detected", False))
+        }
+
+    event["previous_hash"] = previous_hash
     event["event_hash"] = create_hash(event)
 
     inserted_event = insert_audit_log(event)

@@ -28,7 +28,12 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-origins = os.environ.get("AGENTGUARD_CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+origins_str = (
+    os.environ.get("AGENTGUARD_ALLOWED_ORIGINS")
+    or os.environ.get("AGENTGUARD_CORS_ORIGINS")
+    or "http://localhost:3000,http://127.0.0.1:3000"
+)
+origins = [origin.strip() for origin in origins_str.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,6 +46,7 @@ app.include_router(action_router)
 app.include_router(approval_router)
 app.include_router(simulation_router)
 app.include_router(audit_router)
+app.include_router(audit_router, prefix="/v1")
 app.include_router(authorize_router)
 app.include_router(agents_router)
 
@@ -65,8 +71,26 @@ def health():
     except Exception:
         db_status = "offline"
 
+    bedrock_configured = bool(os.environ.get("BEDROCK_GUARDRAIL_ID", "").strip())
+    bedrock_required = os.environ.get("BEDROCK_REQUIRED", "false").lower() in ("true", "1", "yes")
+    bedrock_ready = False
+
+    if bedrock_configured:
+        try:
+            from app.services.bedrock_guardrail import get_bedrock_client
+            client = get_bedrock_client()
+            bedrock_ready = client is not None
+        except Exception:
+            bedrock_ready = False
+
+    is_healthy = (db_status == "online") and (not bedrock_required or bedrock_ready)
+
     return {
-        "status": "healthy" if db_status == "online" else "degraded",
+        "status": "healthy" if is_healthy else "degraded",
+        "service": "agentguard",
+        "version": "1.0.0",
+        "bedrock": bedrock_ready,
+        "database": db_status,
         "authorization_engine": "online",
         "risk_engine": "online",
         "threat_detector": "online",

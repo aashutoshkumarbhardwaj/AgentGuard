@@ -181,3 +181,7 @@
   font-style: normal;
   font-display: swap;
 }
+
+.font-memorable {
+  font-family: 'Memorable', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}

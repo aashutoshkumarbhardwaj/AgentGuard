@@ -50,7 +50,9 @@ const config: Config = {
         'dash-flow': 'dash-flow 1s linear infinite',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['Memorable', 'var(--font-inter)', 'system-ui', 'sans-serif'],
+        memorable: ['Memorable', 'system-ui', 'sans-serif'],
+        'memorable-serif': ['Memorable Serif', 'serif'],
         mono: ['var(--font-jetbrains)', 'ui-monospace', 'monospace'],
       },
       letterSpacing: { tightest: '-0.03em' },

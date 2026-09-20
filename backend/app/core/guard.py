@@ -1,6 +1,7 @@
 from app.core.policies import POLICIES
 from app.services.risk_engine import assess_risk
 from app.services.context_engine import analyze_context
+from app.services.bedrock_guardrail import evaluate_bedrock_guardrail, extract_evaluation_text
 from app.security.cedar.engine import cedar_authorize
 from app.security.normalize import normalize_action
 from app.db.agents import get_agent, can_use_tool
@@ -29,6 +30,13 @@ def evaluate_action(
                 "cedar_allowed": False,
                 "agent_registered": False,
             },
+            "security": {},
+            "bedrock": {
+                "available": False,
+                "blocked": False,
+                "prompt_attack_detected": False,
+                "sensitive_information_detected": False,
+            },
         }
 
     policy_key = normalize_action(tool, action)
@@ -47,6 +55,13 @@ def evaluate_action(
                 "agent_registered": True,
                 "agent_permission": False,
             },
+            "security": {},
+            "bedrock": {
+                "available": False,
+                "blocked": False,
+                "prompt_attack_detected": False,
+                "sensitive_information_detected": False,
+            },
         }
 
     policy = POLICIES.get(policy_key)
@@ -61,7 +76,14 @@ def evaluate_action(
             "factors": ["Unknown action"],
             "authorization": {
                 "cedar_allowed": False
-            }
+            },
+            "security": {},
+            "bedrock": {
+                "available": False,
+                "blocked": False,
+                "prompt_attack_detected": False,
+                "sensitive_information_detected": False,
+            },
         }
 
     # --------------------------------------------------
@@ -78,7 +100,14 @@ def evaluate_action(
     )
 
     # --------------------------------------------------
-    # 2. Risk analysis
+    # 2. Amazon Bedrock Guardrail assessment
+    # --------------------------------------------------
+
+    eval_text = extract_evaluation_text(arguments=arguments, context=context, action=action)
+    bedrock_result = evaluate_bedrock_guardrail(eval_text)
+
+    # --------------------------------------------------
+    # 3. Existing risk analysis
     # --------------------------------------------------
 
     risk = assess_risk(
@@ -88,7 +117,7 @@ def evaluate_action(
     )
 
     # --------------------------------------------------
-    # 3. Context / threat analysis
+    # 4. Context / threat analysis (Prompt Injection + Data Classifier)
     # --------------------------------------------------
 
     context_analysis = analyze_context(
@@ -98,10 +127,7 @@ def evaluate_action(
     )
 
     factors = list(risk["factors"])
-
-    factors.extend(
-        context_analysis["factors"]
-    )
+    factors.extend(context_analysis["factors"])
 
     score = max(
         policy["risk_score"],
@@ -109,8 +135,28 @@ def evaluate_action(
     )
 
     # --------------------------------------------------
-    # 4. Security escalation
+    # 5. Combine security signals & escalation
     # --------------------------------------------------
+
+    bedrock_prompt_attack = bedrock_result.get("prompt_attack_detected", False)
+    bedrock_sensitive = bedrock_result.get("sensitive_information_detected", False)
+    bedrock_blocked = bedrock_result.get("blocked", False)
+
+    if bedrock_prompt_attack:
+        score = max(score, 90)
+        factors.append("Amazon Bedrock detected prompt attack")
+
+    if bedrock_sensitive:
+        factors.append("Amazon Bedrock detected sensitive information")
+        if context.get("destination") == "external":
+            score = max(score, 95)
+            factors.append("Bedrock sensitive data directed to external destination")
+        else:
+            score = max(score, 70)
+
+    if bedrock_blocked and not (bedrock_prompt_attack or bedrock_sensitive):
+        score = max(score, 90)
+        factors.append("Amazon Bedrock Guardrail policy violation")
 
     prompt_injection_detected = (
         context_analysis["prompt_injection"]["detected"]
@@ -118,76 +164,83 @@ def evaluate_action(
 
     if prompt_injection_detected:
         score = max(score, 90)
-        factors.append(
-            "Prompt injection detected by security layer"
-        )
+        factors.append("Prompt injection detected by security layer")
         
-    if (
-        context_analysis["data_classification"]["sensitive"]
-    ):
+    if context_analysis["data_classification"]["sensitive"]:
         score = max(score, 100)
-
-        factors.append(
-            "Sensitive data exposure"
-        )
+        factors.append("Sensitive data exposure")
 
     if (
         context_analysis["data_classification"]["sensitive"]
         and context.get("destination") == "external"
     ):
         score = max(score, 95)
-
-        factors.append(
-            "Potential data exfiltration"
-        )
+        factors.append("Potential data exfiltration")
 
     # Cedar denial is a hard security boundary.
     if not cedar_result["allowed"]:
         score = 100
-
-        factors.append(
-            "Cedar authorization denied"
-        )
+        factors.append("Cedar authorization denied")
 
     score = min(score, 100)
 
     # --------------------------------------------------
-    # 5. Risk level
+    # 6. Risk level
     # --------------------------------------------------
 
     if score >= 90:
         risk_level = "CRITICAL"
-
     elif score >= 70:
         risk_level = "HIGH"
-
     elif score >= 40:
         risk_level = "MEDIUM"
-
     else:
         risk_level = "LOW"
 
     # --------------------------------------------------
-    # 6. Final AgentGuard decision
+    # 7. Final AgentGuard decision
     # --------------------------------------------------
 
     decision = policy["decision"]
 
+    # Cedar DENY is an unconditional BLOCK
     if not cedar_result["allowed"]:
         decision = "BLOCK"
-
-    elif prompt_injection_detected:
+    elif prompt_injection_detected or bedrock_prompt_attack:
         decision = "BLOCK"
-
+    elif bedrock_sensitive and context.get("destination") == "external":
+        decision = "BLOCK"
+    elif bedrock_blocked:
+        decision = "BLOCK"
     elif risk_level == "CRITICAL":
         decision = "BLOCK"
+
+    # Determine primary reason if blocked by security
+    reason = policy["reason"]
+    if decision == "BLOCK":
+        if not cedar_result["allowed"]:
+            reason = "Cedar authorization denied"
+        elif prompt_injection_detected or bedrock_prompt_attack:
+            reason = "Prompt injection attack detected"
+        elif bedrock_sensitive and context.get("destination") == "external":
+            reason = "Sensitive data exfiltration detected"
+        elif bedrock_blocked:
+            reason = bedrock_result.get("reason", "Amazon Bedrock Guardrail intervened")
+
+    bedrock_audit = {
+        "available": bedrock_result.get("available", False),
+        "blocked": bedrock_result.get("blocked", False),
+        "prompt_attack_detected": bedrock_prompt_attack,
+        "sensitive_information_detected": bedrock_sensitive,
+        "assessments": bedrock_result.get("assessments", []),
+    }
 
     return {
         "decision": decision,
         "risk_level": risk_level,
         "risk_score": score,
         "policy_id": policy["policy_id"],
-        "reason": policy["reason"],
+        "reason": reason,
         "factors": list(set(factors)),
 
         "authorization": {
@@ -196,11 +249,10 @@ def evaluate_action(
         },
 
         "security": {
-            "prompt_injection": context_analysis[
-                "prompt_injection"
-            ],
-            "data_classification": context_analysis[
-                "data_classification"
-            ],
-        }
+            "prompt_injection": context_analysis["prompt_injection"],
+            "data_classification": context_analysis["data_classification"],
+            "bedrock": bedrock_audit,
+        },
+
+        "bedrock": bedrock_audit,
     }
