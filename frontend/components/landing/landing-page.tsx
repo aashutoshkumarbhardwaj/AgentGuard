@@ -19,6 +19,7 @@ import {
   PreFooterTalk,
   FooterCta
 } from './sections';
+import { StickyBanner } from '@/components/ui/sticky-banner';
 
 gsap.registerPlugin(ScrollTrigger);
 export function LandingPage() {
@@ -33,6 +34,14 @@ export function LandingPage() {
 
   return (
     <main ref={mainRef} className="landing-page">
+      <StickyBanner className="bg-gradient-to-b from-blue-500 to-blue-600 z-[60] min-h-16 py-3">
+        <p className="mx-0 max-w-[90%] text-white drop-shadow-md text-[14.5px] tracking-wide text-center">
+          Announcing $10M seed funding from project mayhem ventures.{" "}
+          <a href="#" className="transition duration-200 hover:underline font-semibold ml-1.5 underline-offset-4">
+            Read announcement
+          </a>
+        </p>
+      </StickyBanner>
       <Header />
       <CinematicIntro />
       <MemoryUseCases />

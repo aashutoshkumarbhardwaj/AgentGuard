@@ -57,7 +57,7 @@ export function Hero() {
           <div className="landing-hero-eyebrow">
             BACKED BY
             <span className="landing-yc-badge">Y</span>
-            COMBINATOR
+            JUGAAD LABS INC.
           </div>
           <h1 className="landing-hero-title" style={{ fontFamily: 'Memorable, sans-serif' }}>
             Procedural, Graph<br />Based<br />Memory For Agents.

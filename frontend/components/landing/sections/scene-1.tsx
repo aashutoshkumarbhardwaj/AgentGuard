@@ -33,7 +33,7 @@ export function Scene1() {
         <div className="scene1-yc-badge">
           <span className="scene1-yc-backed">BACKED BY</span>
           <span className="scene1-yc-logo">Y</span>
-          <span className="scene1-yc-name">COMBINATOR</span>
+          <span className="scene1-yc-name">JUGAAD LABS INC.</span>
         </div>
 
         {/* Main heading */}

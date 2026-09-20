@@ -8,7 +8,7 @@ import { Logo } from './Logo';
 
 const NAV_ITEMS = [
   { label: 'DOCS', href: '/docs' },
-  { label: 'USE-CASE', href: '/#use-case' },
+  { label: 'USE-CASE', href: '/usecase' },
   { label: 'CASE STUDIES', href: '/#case-studies' },
 ];
 
@@ -17,7 +17,12 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [clickedNav, setClickedNav] = useState<string | null>(null);
 
-  const activeNav = pathname === '/docs' ? 'DOCS' : 'USE-CASE';
+  let activeNav = 'USE-CASE';
+  if (pathname.startsWith('/docs')) {
+    activeNav = 'DOCS';
+  } else if (pathname.startsWith('/usecase') || pathname.startsWith('/use-case')) {
+    activeNav = 'USE-CASE';
+  }
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, label: string, href: string) => {
     setClickedNav(label);
