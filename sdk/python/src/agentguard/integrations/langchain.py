@@ -11,7 +11,7 @@ def wrap_langchain_tool(guard: AgentGuard, tool: Any, agentguard_tool: str, agen
     except ImportError:
         raise ImportError(
             "langchain_core is not installed. "
-            "Please install it using 'pip install agentguard-sdk[langchain]'."
+            "Please install it using 'pip install agentguard-shield[langchain]'."
         )
 
     if not isinstance(tool, BaseTool):

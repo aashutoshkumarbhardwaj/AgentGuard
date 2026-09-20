@@ -12,7 +12,7 @@ def wrap_crewai_tool(guard: AgentGuard, tool: Any, agentguard_tool: str, agentgu
     except ImportError:
         raise ImportError(
             "crewai is not installed. "
-            "Please install it using 'pip install agentguard-sdk[crewai]'."
+            "Please install it using 'pip install agentguard-shield[crewai]'."
         )
 
     if not isinstance(tool, BaseTool):
