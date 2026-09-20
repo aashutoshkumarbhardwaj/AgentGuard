@@ -366,28 +366,58 @@ async def test_12_two_upstream_servers_discovery_and_routing():
 # --------------------------------------------------------------------------
 @pytest.mark.anyio
 async def test_13_actual_mcp_client_stdio_session():
+    import tempfile
     from mcp.client.stdio import stdio_client, StdioServerParameters
 
-    server_params = StdioServerParameters(
-        command=".venv/bin/python",
-        args=["-m", "app.mcp.mcp_server"],
-        env=dict(os.environ),
-    )
+    # Write a temporary mcp_servers.json pointing to the mock upstream.
+    # This is required because the production mcp_servers.json is intentionally
+    # empty ({"servers": []}); the subprocess gateway must know about the mock.
+    mock_config = {
+        "servers": [
+            {
+                "id": "mock",
+                "name": "Mock Upstream MCP Server",
+                "transport": "stdio",
+                "command": ".venv/bin/python",
+                "args": ["-m", "tests.mock_upstream_mcp"],
+                "env": {}
+            }
+        ]
+    }
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", delete=False, dir="."
+    ) as tmp:
+        import json as _json
+        _json.dump(mock_config, tmp)
+        tmp_path = tmp.name
 
-    async with stdio_client(server_params) as (read_stream, write_stream):
-        async with ClientSession(read_stream, write_stream) as session:
-            await session.initialize()
-            tools = await session.list_tools()
-            tool_names = [t.name for t in tools.tools]
-            assert len(tool_names) > 0
+    try:
+        test_env = dict(os.environ)
+        test_env["MCP_CONFIG_PATH"] = tmp_path
 
-            # Execute tool through live stdio gateway
-            res = await session.call_tool(
-                "mock:get_item",
-                {"item_id": "stdio-test", "agent_id": "research-agent", "user_id": "user1"},
-            )
-            assert res.is_error is not True
-            assert "Item stdio-test" in res.content[0].text
+        server_params = StdioServerParameters(
+            command=".venv/bin/python",
+            args=["-m", "app.mcp.mcp_server"],
+            env=test_env,
+        )
+
+        async with stdio_client(server_params) as (read_stream, write_stream):
+            async with ClientSession(read_stream, write_stream) as session:
+                await session.initialize()
+                tools = await session.list_tools()
+                tool_names = [t.name for t in tools.tools]
+                assert len(tool_names) > 0, "Gateway subprocess found no tools — check MCP_CONFIG_PATH"
+
+                # Execute tool through live stdio gateway
+                res = await session.call_tool(
+                    "mock:get_item",
+                    {"item_id": "stdio-test", "agent_id": "research-agent", "user_id": "user1"},
+                )
+                assert res.is_error is not True
+                assert "Item stdio-test" in res.content[0].text
+    finally:
+        import os as _os
+        _os.unlink(tmp_path)
 
 
 # --------------------------------------------------------------------------
