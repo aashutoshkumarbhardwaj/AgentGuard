@@ -153,6 +153,14 @@
 @font-face {
   font-family: 'Memorable';
   src: url('/fonts/797e433ab948586e-s.p.1v5bejj26fx9h.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Memorable';
+  src: url('/fonts/797e433ab948586e-s.p.1v5bejj26fx9h.woff2') format('woff2');
   font-weight: bold;
   font-style: normal;
   font-display: swap;

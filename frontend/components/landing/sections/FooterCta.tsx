@@ -148,64 +148,69 @@ export function FooterCta() {
 
       <div className="relative z-20 max-w-[1400px] mx-auto w-full px-6 md:px-12 flex-1 flex flex-col justify-between h-full">
         <div className="flex flex-col md:flex-row justify-between w-full">
-          {/* Left Column - Memorable Brand */}
+          {/* Left Column - AgentGuard Brand */}
           <div className="max-w-[400px]">
             <div className="flex items-baseline gap-2 mb-6">
-              <h2 className="text-[32px] tracking-tight text-white leading-none" style={{ fontFamily: 'Memorable Serif, serif' }}>memorable</h2>
-              <span className="text-white/50 text-[13px] font-mono">/&apos;mɛm(ə)rəb(ə)l/ <i style={{ fontFamily: 'Memorable Serif, serif' }}>adj</i></span>
+              <h2 className="text-[32px] tracking-tight text-white leading-none" style={{ fontFamily: 'Memorable Serif, serif' }}>agentguard</h2>
+              <span className="text-white/50 text-[13px] font-mono">/ˈeɪ.dʒənt.ɡɑːrd/ <i style={{ fontFamily: 'Memorable Serif, serif' }}>noun</i></span>
             </div>
 
             <div className="space-y-4 mb-8 text-white/70 text-[13px] border-b border-white/10 pb-6">
               <div className="flex gap-4">
                 <span className="text-[10px] text-white/40 mt-0.5">1</span>
-                <p>not to be forgotten; remarkable.</p>
+                <p>runtime security & authorization control plane for AI agents.</p>
               </div>
               <div className="flex gap-4">
                 <span className="text-[10px] text-white/40 mt-0.5">2</span>
-                <p>easy to remember; recalled without effort.</p>
+                <p>verifies every tool request against Cedar policies before execution.</p>
               </div>
             </div>
 
             {/* Email Button with Spotlight on Hover */}
             <FooterSpotlightButton
-              href="mailto:info@memorable.sh"
+              href="mailto:contact@agentguard.dev"
               className="w-auto inline-flex"
               colors={[[147, 51, 234], [59, 130, 246]]}
             >
               <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <span>info@memorable.sh</span>
+              <span>contact@agentguard.dev</span>
             </FooterSpotlightButton>
           </div>
 
           {/* Middle Columns - Links */}
-          <div className="flex flex-wrap gap-12 md:gap-24 mt-16 md:mt-0 font-mono">
+          <div className="flex flex-wrap gap-10 md:gap-20 mt-16 md:mt-0 font-mono">
             <div>
-              <h3 className="text-white mb-5 text-[14px]">Quick Links</h3>
+              <h3 className="text-white mb-5 text-[14px] font-medium tracking-wide" style={{ fontFamily: 'Memorable, sans-serif' }}>Platform</h3>
               <ul className="space-y-3.5 text-white/60 text-[13px]">
                 <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
-                <li><Link href="/docs" className="hover:text-white transition-colors">Docs</Link></li>
-                <li><Link href="/mcp" className="hover:text-white transition-colors">Dashboard</Link></li>
+                <li><Link href="/overview" className="hover:text-white transition-colors">Overview</Link></li>
+                <li><Link href="/simulator" className="hover:text-white transition-colors">Simulator</Link></li>
+                <li><Link href="/audit" className="hover:text-white transition-colors">Audit Ledger</Link></li>
+                <li><Link href="/docs" className="hover:text-white transition-colors">Documentation</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="text-white mb-5 text-[14px]">Use Cases</h3>
+              <h3 className="text-white mb-5 text-[14px] font-medium tracking-wide" style={{ fontFamily: 'Memorable, sans-serif' }}>Tools & Services</h3>
               <ul className="space-y-3.5 text-white/60 text-[13px]">
-                <li><a href="#use-case" className="hover:text-white transition-colors">Coding agents</a></li>
-                <li><a href="#use-case" className="hover:text-white transition-colors">Browser agents</a></li>
-                <li><a href="#use-case" className="hover:text-white transition-colors">Computer use</a></li>
-                <li><a href="#use-case" className="hover:text-white transition-colors">Voice agents</a></li>
-                <li><a href="#use-case" className="hover:text-white transition-colors">Research agents</a></li>
-                <li><a href="#use-case" className="hover:text-white transition-colors">Ops agents</a></li>
+                <li><Link href="/mcp" className="hover:text-white transition-colors">MCP Security Gateway</Link></li>
+                <li><Link href="/policies" className="hover:text-white transition-colors">Cedar Policy Engine</Link></li>
+                <li><Link href="/threats" className="hover:text-white transition-colors">Threat & Prompt Injection</Link></li>
+                <li><Link href="/permissions" className="hover:text-white transition-colors">Sensitive Data Classifier</Link></li>
+                <li><Link href="/approvals" className="hover:text-white transition-colors">Human Approvals (HITL)</Link></li>
+                <li><Link href="/agents" className="hover:text-white transition-colors">Agent Identity & Scopes</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="text-white mb-5 text-[14px]">Company</h3>
+              <h3 className="text-white mb-5 text-[14px] font-medium tracking-wide" style={{ fontFamily: 'Memorable, sans-serif' }}>Resources</h3>
               <ul className="space-y-3.5 text-white/60 text-[13px]">
                 <li><a href="#case-studies" className="hover:text-white transition-colors">Case Studies</a></li>
+                <li><Link href="/docs" className="hover:text-white transition-colors">Security Model</Link></li>
+                <li><Link href="/developer" className="hover:text-white transition-colors">API Reference</Link></li>
+                <li><a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">SDK Repository</a></li>
               </ul>
             </div>
           </div>
@@ -252,20 +257,21 @@ export function FooterCta() {
           </div>
         </div>
 
-        {/* Large Memorable Text */}
-        <div className="mt-32 w-full flex justify-center items-end relative overflow-visible">
-          <h1 className="text-[14vw] sm:text-[18vw] leading-[0.75] font-bold text-white tracking-[-0.03em] select-none" style={{ fontFamily: 'Memorable, sans-serif' }}>
-            Memorable
+        {/* Large AgentGuard Text */}
+        <div className="mt-28 sm:mt-32 w-full flex justify-center items-end relative overflow-visible">
+          <h1 className="text-[13vw] sm:text-[15.5vw] leading-[0.75] font-bold text-white tracking-[-0.035em] select-none text-center" style={{ fontFamily: 'Memorable, sans-serif' }}>
+            AgentGuard
           </h1>
         </div>
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-[12px] text-white/40">
-          <p>© 2026 Memorable. All Rights Reserved.</p>
-          <p className="mt-4 md:mt-0">Website By <span className="text-white">Lumina</span></p>
+          <p>© 2026 AgentGuard Inc. All Rights Reserved.</p>
+          <p className="mt-4 md:mt-0">Runtime Security for Autonomous Agents</p>
           <div className="flex gap-6 mt-4 md:mt-0">
             <a href="#" className="hover:text-white transition-colors">Terms & Conditions</a>
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition-colors">Security Policy</a>
           </div>
         </div>
       </div>

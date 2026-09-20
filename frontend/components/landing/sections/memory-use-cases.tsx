@@ -4,40 +4,39 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Copy, Check } from 'lucide-react';
-import { CardSpotlight } from '@/components/ui/card-spotlight';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const CARDS_DATA = [
   {
     number: '01',
-    title: 'Install in one command',
-    description: 'Point it at Claude Code, Codex, Cursor, or any other harness you run.',
-    commandHighlight: 'login'
+    title: 'Works with\nyour agent',
+    description: 'Connect Claude, Cursor, LangChain, or your custom agent harness to the AgentGuard security proxy.',
+    commandHighlight: 'proxy'
   },
   {
     number: '02',
-    title: 'Set up once',
-    description: 'Run the commands on the left to set up and sign in.\nMemorable then works in the background.',
-    commandHighlight: 'enable'
+    title: 'Cedar policy\nenforcement',
+    description: 'Every tool request is evaluated against Cedar authorization, RBAC rules, and agent permission boundaries.',
+    commandHighlight: 'cedar'
   },
   {
     number: '03',
-    title: 'Create new\nmemorables',
-    description: 'Capture every workflow your agents run or recall as a\nreusable memorable.',
-    commandHighlight: 'recall'
+    title: 'Real-time\nrisk scoring',
+    description: 'Detect prompt injection, tool chaining anomalies, and high-risk argument payloads before execution.',
+    commandHighlight: 'risk'
   },
   {
     number: '04',
-    title: 'Recall in\n~60ms',
-    description: 'Three matchers at once: exact, lexical, semantic so your\nagent hits the fastest verified path.',
-    commandHighlight: 'show'
+    title: 'Decide in\n<5ms',
+    description: 'Deterministically returns ALLOW, requests human APPROVE for critical actions, or triggers immediate BLOCK.',
+    commandHighlight: 'evaluate'
   },
   {
     number: '05',
     title: 'What is\nstored',
-    description: 'The files touched, the command that proved it worked, and the order with real exit codes. The transcript is never sent.',
-    commandHighlight: 'disable'
+    description: 'Cedar evaluation proofs, decision telemetry, and immutable audit logs. Sensitive secrets are never exposed.',
+    commandHighlight: 'audit'
   }
 ];
 
@@ -171,15 +170,25 @@ export function MemoryUseCases() {
   const handleCopy = () => {
     let text = '';
     if (activeTab === 'cli') {
-      text = 'npx memorable-cli';
+      text = 'agentguard start --port 8000';
     } else if (activeTab === 'claude') {
-      text = `$memorable login\n$memorable install-hooks\n$memorable enable\n$memorable recall "fix the failing auth test"`;
+      text = 'claude --mcp-config ./agentguard_mcp.json';
     } else {
-      text = `curl -X POST https://api.memorable.sh/v1/extract`;
+      text = `curl -X POST https://api.agentguard.dev/v1/evaluate \\\n  -H "Authorization: Bearer $AGENTGUARD_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"agent_id": "research-agent", "action": "data.export"}'`;
     }
     navigator.clipboard?.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const scrollToCard = (index: number) => {
+    setActiveCardIndex(index);
+    const st = ScrollTrigger.getById('memorable-scroll');
+    if (st) {
+      const targetProgress = index / (CARDS_DATA.length - 1);
+      const targetY = st.start + targetProgress * (st.end - st.start);
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+    }
   };
 
   useLayoutEffect(() => {
@@ -187,17 +196,16 @@ export function MemoryUseCases() {
       const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
       if (cards.length < 5) return;
 
-      // Card 0 (01) starts centered and active
+      // Initial states: Card 0 starts centered; Card 1 visibly rests in the bottom-right corner; Cards 2..4 queued
       gsap.set(cards[0], { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, zIndex: 10 });
-
-      // Cards 1..4 start in the bottom-right corner at rotation angle (-7.5 deg)
-      gsap.set(cards[1], { x: 90, y: 260, rotation: -7.5, scale: 0.98, opacity: 0, zIndex: 20 });
-      gsap.set(cards[2], { x: 110, y: 300, rotation: -8, scale: 0.98, opacity: 0, zIndex: 25 });
-      gsap.set(cards[3], { x: 110, y: 300, rotation: -8, scale: 0.98, opacity: 0, zIndex: 30 });
-      gsap.set(cards[4], { x: 110, y: 300, rotation: -8, scale: 0.98, opacity: 0, zIndex: 35 });
+      gsap.set(cards[1], { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0.55, zIndex: 20 });
+      gsap.set(cards[2], { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0, zIndex: 30 });
+      gsap.set(cards[3], { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0, zIndex: 40 });
+      gsap.set(cards[4], { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0, zIndex: 50 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
+          id: 'memorable-scroll',
           trigger: sectionRef.current,
           start: 'top top',
           end: '+=3400',
@@ -206,13 +214,13 @@ export function MemoryUseCases() {
           anticipatePin: 1,
           onUpdate: (self) => {
             const p = self.progress;
-            const newIndex = Math.min(4, Math.floor(p * 5));
+            const newIndex = Math.min(4, Math.max(0, Math.round(p * 4)));
             setActiveCardIndex(newIndex);
           }
         }
       });
 
-      // Segment 1 (Card 01 recedes to top-left; Card 02 glides from bottom-right corner to center)
+      // Segment 1 (Card 01 recedes to top-left; Card 02 glides from corner into center; Card 03 queues in corner)
       tl.to(cards[0], {
         x: -28,
         y: -36,
@@ -222,15 +230,25 @@ export function MemoryUseCases() {
         duration: 1
       }, 0)
       .fromTo(cards[1],
-        { x: 90, y: 260, rotation: -7.5, opacity: 0 },
-        { x: 0, y: 0, rotation: 0, opacity: 1, scale: 1, ease: 'power2.out', duration: 1 },
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0.55 },
+        { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, ease: 'power2.out', duration: 1 },
         0
+      )
+      .to(cards[1], {
+        opacity: 1,
+        ease: 'power1.out',
+        duration: 0.25
+      }, 0)
+      .fromTo(cards[2],
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0 },
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0.55, ease: 'power1.inOut', duration: 0.4 },
+        0.6
       );
 
-      // Segment 2 (Card 01 fades away; Card 02 recedes to top-left; Card 03 glides from bottom-right corner to center)
+      // Segment 2 (Card 01 fades away; Card 02 recedes to top-left; Card 03 glides from corner into center; Card 04 queues in corner)
       tl.to(cards[0], {
-        x: -52,
-        y: -64,
+        x: -54,
+        y: -68,
         scale: 0.92,
         opacity: 0,
         ease: 'power2.inOut',
@@ -245,15 +263,25 @@ export function MemoryUseCases() {
         duration: 1
       }, 1)
       .fromTo(cards[2],
-        { x: 90, y: 260, rotation: -7.5, opacity: 0 },
-        { x: 0, y: 0, rotation: 0, opacity: 1, scale: 1, ease: 'power2.out', duration: 1 },
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0.55 },
+        { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, ease: 'power2.out', duration: 1 },
         1
+      )
+      .to(cards[2], {
+        opacity: 1,
+        ease: 'power1.out',
+        duration: 0.25
+      }, 1)
+      .fromTo(cards[3],
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0 },
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0.55, ease: 'power1.inOut', duration: 0.4 },
+        1.6
       );
 
-      // Segment 3 (Card 02 fades away; Card 03 recedes to top-left; Card 04 glides from bottom-right corner to center)
+      // Segment 3 (Card 02 fades away; Card 03 recedes to top-left; Card 04 glides from corner into center; Card 05 queues in corner)
       tl.to(cards[1], {
-        x: -52,
-        y: -64,
+        x: -54,
+        y: -68,
         scale: 0.92,
         opacity: 0,
         ease: 'power2.inOut',
@@ -268,15 +296,25 @@ export function MemoryUseCases() {
         duration: 1
       }, 2)
       .fromTo(cards[3],
-        { x: 90, y: 260, rotation: -7.5, opacity: 0 },
-        { x: 0, y: 0, rotation: 0, opacity: 1, scale: 1, ease: 'power2.out', duration: 1 },
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0.55 },
+        { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, ease: 'power2.out', duration: 1 },
         2
+      )
+      .to(cards[3], {
+        opacity: 1,
+        ease: 'power1.out',
+        duration: 0.25
+      }, 2)
+      .fromTo(cards[4],
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0 },
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0.55, ease: 'power1.inOut', duration: 0.4 },
+        2.6
       );
 
-      // Segment 4 (Card 03 fades away; Card 04 recedes to top-left; Card 05 glides from bottom-right corner to center)
+      // Segment 4 (Card 03 fades away; Card 04 recedes to top-left; Card 05 glides from corner into center)
       tl.to(cards[2], {
-        x: -52,
-        y: -64,
+        x: -54,
+        y: -68,
         scale: 0.92,
         opacity: 0,
         ease: 'power2.inOut',
@@ -291,10 +329,15 @@ export function MemoryUseCases() {
         duration: 1
       }, 3)
       .fromTo(cards[4],
-        { x: 90, y: 260, rotation: -7.5, opacity: 0 },
-        { x: 0, y: 0, rotation: 0, opacity: 1, scale: 1, ease: 'power2.out', duration: 1 },
+        { x: 95, y: 260, rotation: -7.5, scale: 0.96, opacity: 0.55 },
+        { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, ease: 'power2.out', duration: 1 },
         3
-      );
+      )
+      .to(cards[4], {
+        opacity: 1,
+        ease: 'power1.out',
+        duration: 0.25
+      }, 3);
 
     }, sectionRef);
 
@@ -346,7 +389,7 @@ export function MemoryUseCases() {
                     onClick={() => setActiveTab('cli')}
                     className={`memorable-tab-btn ${activeTab === 'cli' ? 'active' : ''}`}
                   >
-                    npx memorable-cli
+                    agentguard
                     {activeTab === 'cli' && <span className="memorable-tab-line" />}
                   </button>
                   <button
@@ -354,7 +397,7 @@ export function MemoryUseCases() {
                     onClick={() => setActiveTab('claude')}
                     className={`memorable-tab-btn ${activeTab === 'claude' ? 'active' : ''}`}
                   >
-                    Claude Code
+                    Claude / MCP
                     {activeTab === 'claude' && <span className="memorable-tab-line" />}
                   </button>
                   <button
@@ -390,24 +433,24 @@ export function MemoryUseCases() {
                 {activeTab === 'cli' && (
                   <pre className="memorable-code-pre">
                     <code>
-                      <span className="text-white font-semibold">memorable</span> <span className="code-comment">0.5.18</span>{'\n'}
-                      <span className="text-white/60">procedural memory for agents, stored on your own machine</span>{'\n'}
+                      <span className="text-white font-semibold">agentguard</span> <span className="code-comment">v1.4.0</span>{'\n'}
+                      <span className="text-white/60">runtime security & authorization layer for AI agents</span>{'\n'}
                       {'\n'}
-                      <span className="text-white/50">backend    </span> <span className="text-white/80">gbrain · your own gbrain database</span>{'\n'}
-                      <span className="text-white/50">extraction </span> <span className="text-white/80">configured · no model in the loop</span>{'\n'}
+                      <span className="text-white/50">policy     </span> <span className="text-white/80">cedar · sub-millisecond evaluation</span>{'\n'}
+                      <span className="text-white/50">threats    </span> <span className="text-white/80">active · prompt injection & exfil defense</span>{'\n'}
                       {'\n'}
                       <span className="text-white/40 text-[11px] uppercase tracking-wider">COMMANDS</span>{'\n'}
-                      <span className="text-white/90">setup      </span> <span className="text-white/70">init setup login install-hooks agents-md</span>{'\n'}
-                      <span className="text-white/90">memory     </span> <span className="text-white/70">record ingest backfill recall show list chain</span>{'\n'}
-                      <span className="text-white/90">upkeep     </span> <span className="text-white/70">prune enable disable forget flush</span>{'\n'}
-                      <span className="text-white/90">inspect    </span> <span className="text-white/70">status doctor eval notices</span>{'\n'}
+                      <span className="text-white/90">gateway    </span> <span className="text-white/70">serve upstream bind mcp-proxy tls</span>{'\n'}
+                      <span className="text-white/90">policy     </span> <span className="text-white/70">validate compile format test diff</span>{'\n'}
+                      <span className="text-white/90">audit      </span> <span className="text-white/70">tail query export verify-hash</span>{'\n'}
+                      <span className="text-white/90">simulate   </span> <span className="text-white/70">run replay benchmark redteam</span>{'\n'}
                       {'\n'}
                       <div className="terminal-divider" />
                       {'\n'}
                       <span className="code-amber font-semibold">start</span>{'\n'}
                       <span className="text-white/40 text-[11px] uppercase tracking-wider">RUN</span>{'\n'}
-                      <span className="text-white/90 font-medium">memorable start</span>{'\n'}
-                      <span className="text-white/60">Sets all of this up for you.</span>{'\n'}
+                      <span className="text-white/90 font-medium">agentguard start --port 8000</span>{'\n'}
+                      <span className="text-white/60">Intercepts and authorizes all agent tool calls.</span>{'\n'}
                       <span className="code-cursor">█</span>
                     </code>
                   </pre>
@@ -416,25 +459,21 @@ export function MemoryUseCases() {
                 {activeTab === 'claude' && (
                   <pre className="memorable-code-pre">
                     <code>
-                      <span className="text-white/90">$memorable login</span>{'\n'}
-                      <span className="code-comment"># opens a browser, approves this machine</span>{'\n'}
+                      <span className="text-white/90">$ agentguard mcp attach --upstream http://localhost:8080/mcp</span>{'\n'}
+                      <span className="code-comment"># mounts streamable HTTP security gateway on :8000/mcp</span>{'\n'}
                       {'\n'}
-                      <span className="text-white/90">$memorable install-hooks</span>{'\n'}
-                      <span className="code-comment"># recall runs on every new prompt</span>{'\n'}
+                      <span className="text-white/90">$ claude --mcp-config ./agentguard_mcp.json</span>{'\n'}
+                      <span className="code-comment"># Claude connects to agentguard proxy</span>{'\n'}
                       {'\n'}
-                      <span className="text-white/90">$memorable enable</span>{'\n'}
-                      <span className="code-comment"># explicit write consent, nothing stored before this</span>{'\n'}
+                      <span className="text-white/90">[evaluating] research-agent -&gt; file.delete &#123;&quot;path&quot;: &quot;/etc/shadow&quot;&#125;</span>{'\n'}
+                      <span className="code-amber">CEDAR: ForbidActionOnSystemPaths</span>{'\n'}
+                      <span className="code-amber">RISK_SCORE: 0.94 [CRITICAL]</span>{'\n'}
                       {'\n'}
-                      <span className="text-white/90">$memorable recall "fix the failing auth test"</span>{'\n'}
-                      <span className="code-cyan">0.866 procedures/89f11bab-fix-failing-auth-test</span>{'\n'}
-                      <span className="code-cyan">[lexical,semantic]</span>{'\n'}
+                      <span className="text-rose-400 font-medium">DECISION: BLOCK</span>{'\n'}
+                      <span className="text-white/70">Tool call intercepted. Audit proof logged to tamper-proof ledger.</span>{'\n'}
                       {'\n'}
-                      <span className="text-white/90">$memorable show procedures/89f11bab-fix-failing-auth-test</span>{'\n'}
-                      <span className="code-cyan font-medium">THE FIX LANDED IN: tests/auth/session.test.ts</span>{'\n'}
-                      <span className="text-white/70">Verified last time by: npm test -- auth</span>{'\n'}
-                      {'\n'}
-                      <span className="text-white/90">$memorable disable</span>{'\n'}
-                      <span className="code-comment"># memory goes read-only. Recall still works, nothing new is recorded.</span>{'\n'}
+                      <span className="text-emerald-400 font-medium">DECISION: ALLOW · calendar.read</span>{'\n'}
+                      <span className="code-comment"># Safe tool passed through to upstream server in 3.8ms</span>{'\n'}
                       <span className="code-cursor">█</span>
                     </code>
                   </pre>
@@ -443,20 +482,18 @@ export function MemoryUseCases() {
                 {activeTab === 'harness' && (
                   <pre className="memorable-code-pre">
                     <code>
-                      <span className="code-comment"># Any harness sends one JSON trace to POST /v1/extract</span>{'\n'}
-                      <span className="text-white/90">curl -X POST https://api.memorable.sh/v1/extract \</span>{'\n'}
-                      <span className="text-white/70">  -H "Authorization: Bearer $MEMORABLE_KEY" \</span>{'\n'}
-                      <span className="text-white/70">  -H "Content-Type: application/json" \</span>{'\n'}
-                      <span className="text-white/70">  -d '&#123;</span>{'\n'}
-                      <span className="code-cyan">    "session_id": "sess_89f11bab",</span>{'\n'}
-                      <span className="code-cyan">    "harness": "custom_agent",</span>{'\n'}
-                      <span className="text-white/70">    "steps": [</span>{'\n'}
-                      <span className="text-white/80">      &#123; "action": "test.run", "exit_code": 0 &#125;,</span>{'\n'}
-                      <span className="text-white/80">      &#123; "action": "patch.apply", "verified": true &#125;</span>{'\n'}
-                      <span className="text-white/70">    ]</span>{'\n'}
-                      <span className="text-white/70">  &#125;'</span>{'\n'}
+                      <span className="code-comment"># Any agent sends tool requests to POST /v1/evaluate</span>{'\n'}
+                      <span className="text-white/90">curl -X POST https://api.agentguard.dev/v1/evaluate \</span>{'\n'}
+                      <span className="text-white/70">  -H &quot;Authorization: Bearer $AGENTGUARD_API_KEY&quot; \</span>{'\n'}
+                      <span className="text-white/70">  -H &quot;Content-Type: application/json&quot; \</span>{'\n'}
+                      <span className="text-white/70">  -d &#39;&#123;</span>{'\n'}
+                      <span className="code-cyan">    &quot;agent_id&quot;: &quot;research-agent&quot;,</span>{'\n'}
+                      <span className="code-cyan">    &quot;action&quot;: &quot;data.export&quot;,</span>{'\n'}
+                      <span className="text-white/70">    &quot;parameters&quot;: &#123; &quot;records&quot;: 500 &#125;,</span>{'\n'}
+                      <span className="text-white/70">    &quot;context&quot;: &#123; &quot;user&quot;: &quot;analyst@acme.com&quot; &#125;</span>{'\n'}
+                      <span className="text-white/70">  &#125;&#39;</span>{'\n'}
                       {'\n'}
-                      <span className="code-comment"># Stored locally, on your gbrain DB, or Postgres.</span>{'\n'}
+                      <span className="code-comment"># Verdict: &#123; &quot;decision&quot;: &quot;APPROVE&quot;, &quot;risk&quot;: &quot;HIGH&quot; &#125;</span>{'\n'}
                       <span className="code-cursor">█</span>
                     </code>
                   </pre>
@@ -473,38 +510,39 @@ export function MemoryUseCases() {
             {CARDS_DATA.map((card, index) => {
               const isForeground = activeCardIndex === index;
               return (
-                <CardSpotlight
+                <div
                   key={card.number}
                   ref={(el) => { cardsRef.current[index] = el; }}
-                  radius={280}
-                  color="#1a1033"
+                  onClick={() => scrollToCard(index)}
                   className={`memorable-stack-card ${isForeground ? 'card-foreground' : ''}`}
+                  style={{ cursor: isForeground ? 'default' : 'pointer' }}
                 >
-                  <div className="memorable-card-number relative z-20">{card.number}</div>
+                  <div className="memorable-card-number">{card.number}</div>
                   
-                  <div className="memorable-card-content relative z-20">
+                  <div className="memorable-card-content">
                     <h3 className="memorable-card-title">{card.title}</h3>
                   </div>
 
-                  <p className="memorable-card-desc relative z-20">{card.description}</p>
+                  <p className="memorable-card-desc">{card.description}</p>
 
                   <div className="memorable-card-border-glow" />
-                </CardSpotlight>
+                </div>
               );
             })}
           </div>
 
-
           {/* Step indicators */}
           <div className="memorable-step-dots">
             {CARDS_DATA.map((card, idx) => (
-              <span
+              <button
                 key={card.number}
+                type="button"
+                onClick={() => scrollToCard(idx)}
                 className={`memorable-step-dot ${activeCardIndex === idx ? 'active' : ''}`}
                 title={`Step ${card.number}: ${card.title.replace('\n', ' ')}`}
               >
                 <span className="dot-label">{card.number}</span>
-              </span>
+              </button>
             ))}
           </div>
         </div>

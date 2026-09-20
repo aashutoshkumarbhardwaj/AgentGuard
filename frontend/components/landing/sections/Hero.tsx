@@ -59,8 +59,8 @@ export function Hero() {
             <span className="landing-yc-badge">Y</span>
             JUGAAD LABS INC.
           </div>
-          <h1 className="landing-hero-title" style={{ fontFamily: 'Memorable, sans-serif' }}>
-            Procedural, Graph<br />Based<br />Memory For Agents.
+          <h1 className="landing-hero-title" style={{ fontFamily: 'Memorable, sans-serif', fontWeight: 700 }}>
+            Secure AI Agents<br />Before They Act.
           </h1>
           <div className="landing-hero-actions">
             <Link href="/mcp" className="landing-solid-button">

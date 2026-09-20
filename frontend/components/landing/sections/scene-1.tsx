@@ -37,8 +37,8 @@ export function Scene1() {
         </div>
 
         {/* Main heading */}
-        <h1 className="scene1-heading" style={{ fontFamily: 'Memorable, sans-serif' }}>
-          Procedural, Graph<br />Based<br />Memory For Agents.
+        <h1 className="scene1-heading" style={{ fontFamily: 'Memorable, sans-serif', fontWeight: 700 }}>
+          Secure AI Agents<br />Before They Act.
         </h1>
 
         {/* CTA row */}

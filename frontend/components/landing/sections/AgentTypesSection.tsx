@@ -41,115 +41,115 @@ const AGENT_TYPES: AgentType[] = [
   {
     id: 'browser-use',
     title: 'Browser use',
-    headline: 'Browser Use',
+    headline: 'Browser Agent',
     description:
-      'Known segments of a site replay from the procedure. A layout change is detected and the agent falls back to reasoning.',
+      'DOM interactions and tool requests evaluated before execution. Blocks credential harvesting, unauthorized navigation, and exfiltration.',
     icon: Globe,
-    badge: 'RUNNING_SESSION',
-    previewUrl: 'https://example.com/dashboard',
+    badge: 'SECURE_PROXY_LIVE',
+    previewUrl: 'https://agentguard.dev/proxy/browser',
     previewType: 'browser',
     steps: [
-      { num: '01', label: 'Open website: example.com', actionTag: 'OPEN_SITE' },
-      { num: '02', label: "Click 'Sign In'", actionTag: 'CLICK_ID' },
-      { num: '03', label: 'Fill credentials', actionTag: 'FILL_CREDENTIALS' },
-      { num: '04', label: 'Navigate to dashboard', actionTag: 'NAV_DASHBOARD' },
-      { num: '05', label: 'Extract data', actionTag: 'EXTRACT_DATA' },
-      { num: '06', label: 'Save to file', actionTag: 'SAVE_FILE' },
+      { num: '01', label: 'Intercept navigation & tool request', actionTag: 'INTERCEPT_CALL' },
+      { num: '02', label: 'Scan URL against threat reputation', actionTag: 'DOMAIN_CHECK' },
+      { num: '03', label: 'Classify & redact sensitive PII', actionTag: 'MASK_CREDENTIALS' },
+      { num: '04', label: 'Evaluate Cedar action permissions', actionTag: 'CEDAR_EVAL' },
+      { num: '05', label: 'Verify blast radius & risk score', actionTag: 'RISK_SCORE' },
+      { num: '06', label: 'ALLOW verified browser action', actionTag: 'ALLOW_EXECUTION' },
     ],
   },
   {
     id: 'computer-use',
     title: 'Computer use',
-    headline: 'Computer Use',
+    headline: 'Computer Use OS Agent',
     description:
-      'Screen steps stored as diffs. Targets named by meaning, not coordinates.',
+      'OS-level bash commands, keypresses, and file writes gated by Cedar. Restricts blast radius and halts destructive file operations.',
     icon: Monitor,
-    badge: 'RUNNING_DESKTOP',
-    previewUrl: 'Desktop / Applications / Figma',
+    badge: 'SANDBOX_GUARDED',
+    previewUrl: 'os://system/terminal-session',
     previewType: 'desktop',
     steps: [
-      { num: '01', label: 'Launch app: Figma Workspace', actionTag: 'LAUNCH_APP' },
-      { num: '02', label: 'Locate artboard #04 by OCR', actionTag: 'LOCATE_TARGET' },
-      { num: '03', label: 'Export high-res design assets', actionTag: 'EXPORT_PNG' },
-      { num: '04', label: 'Open Slack client window', actionTag: 'FOCUS_WINDOW' },
-      { num: '05', label: 'Post file to #releases channel', actionTag: 'ATTACH_FILE' },
-      { num: '06', label: 'Confirm delivery receipt', actionTag: 'VERIFY_DELIVERY' },
+      { num: '01', label: 'Intercept bash execution request', actionTag: 'INTERCEPT_CMD' },
+      { num: '02', label: 'Analyze command: file.delete /etc', actionTag: 'SYNTAX_SCAN' },
+      { num: '03', label: 'Evaluate Cedar policy on system path', actionTag: 'POLICY_CHECK' },
+      { num: '04', label: 'Detect critical blast radius anomaly', actionTag: 'RISK_ENGINE' },
+      { num: '05', label: 'BLOCK destructive operation', actionTag: 'BLOCK_ACTION' },
+      { num: '06', label: 'Log cryptographic audit report', actionTag: 'WRITE_AUDIT' },
     ],
   },
   {
     id: 'voice-agents',
     title: 'Voice agents',
-    headline: 'Voice Routine',
+    headline: 'Voice Agent Protection',
     description:
-      'Routines taught in past sessions come back whole. Sensitivity gates at delivery, so the agent can know things it never says.',
+      'Sub-5ms authorization for real-time speech pipelines. Enforces privacy boundaries and halts prompt injection over audio channels.',
     icon: Mic,
-    badge: 'VOICE_STREAM_LIVE',
-    previewUrl: 'Opus 24kHz / RTP Stream',
+    badge: 'VOICE_GUARD_ACTIVE',
+    previewUrl: 'rtp://voice-gateway:8000/stream',
     previewType: 'voice',
     steps: [
-      { num: '01', label: 'Stream inbound microphone audio', actionTag: 'CONNECT_RTP' },
-      { num: '02', label: 'Neural VAD & phoneme chunking', actionTag: 'SEGMENT_VAD' },
-      { num: '03', label: 'Match caller intent to routine', actionTag: 'CACHE_LOOKUP' },
-      { num: '04', label: 'Hydrate caller context in 0ms', actionTag: 'HYDRATE_STATE' },
-      { num: '05', label: 'Synthesize low-latency response', actionTag: 'GENERATE_TTS' },
-      { num: '06', label: 'Emit audio buffer to caller', actionTag: 'PLAYBACK_BUFFER' },
+      { num: '01', label: 'Intercept tool request from voice loop', actionTag: 'VOICE_INTERCEPT' },
+      { num: '02', label: 'Classify spoken transcript intent', actionTag: 'INTENT_EVAL' },
+      { num: '03', label: 'Detect audio prompt injection pattern', actionTag: 'INJECTION_SCAN' },
+      { num: '04', label: 'Redact payment card & PII tokens', actionTag: 'REDACT_PCI' },
+      { num: '05', label: 'Evaluate Cedar caller permissions', actionTag: 'AUTH_CEDAR' },
+      { num: '06', label: 'ALLOW safe response dispatch', actionTag: 'ALLOW_DISPATCH' },
     ],
   },
   {
     id: 'coding-agents',
     title: 'Coding agents',
-    headline: 'Coding Agent',
+    headline: 'Coding Agent Gateway',
     description:
-      'The fix is stored once. The second run skips the reading and lands directly in the modified file.',
+      'Inspects git operations, secret leaks, and patch diffs. Halts malicious dependency installations and unauthorized repo pushes.',
     icon: Code2,
-    badge: 'PATCH_APPLIED',
+    badge: 'GATEWAY_MONITORED',
     previewUrl: 'repo://agentguard/src/auth.ts',
     previewType: 'code',
     steps: [
-      { num: '01', label: 'Parse test error trace log', actionTag: 'PARSE_STACK' },
-      { num: '02', label: 'Fetch procedure patch #029', actionTag: 'FETCH_PATCH' },
-      { num: '03', label: 'Apply unified git diff', actionTag: 'APPLY_DIFF' },
-      { num: '04', label: 'Execute targeted test suite', actionTag: 'RUN_TESTS' },
-      { num: '05', label: 'Verify clean AST typecheck', actionTag: 'TYPECHECK' },
-      { num: '06', label: 'Push verified commit branch', actionTag: 'GIT_PUSH' },
+      { num: '01', label: 'Intercept git push & patch apply', actionTag: 'INSPECT_PATCH' },
+      { num: '02', label: 'Scan commit diff for leaked API keys', actionTag: 'SECRET_SCAN' },
+      { num: '03', label: 'Verify package install: npm / pip', actionTag: 'DEP_AUDIT' },
+      { num: '04', label: 'Evaluate file write permission scope', actionTag: 'CEDAR_EVAL' },
+      { num: '05', label: 'Require human APPROVE for main push', actionTag: 'HITL_APPROVE' },
+      { num: '06', label: 'ALLOW verified commit dispatch', actionTag: 'COMMIT_ALLOW' },
     ],
   },
   {
     id: 'other-custom',
     title: 'Other/custom/enterprise',
-    headline: 'Enterprise Flow',
+    headline: 'Enterprise Security Proxy',
     description:
-      'Internal tools and private APIs run from the same procedural graph. Connect any harness via one JSON trace.',
+      'Universal MCP and REST gateway for private APIs and legacy tools. Connect any agent harness via streamable HTTP proxy.',
     icon: Server,
-    badge: 'API_DISPATCH',
-    previewUrl: 'https://internal.corp/api/v1/sync',
+    badge: 'ENTERPRISE_GATEWAY',
+    previewUrl: 'https://api.agentguard.dev/v1/evaluate',
     previewType: 'api',
     steps: [
-      { num: '01', label: 'Ingest inbound webhook event', actionTag: 'RECV_WEBHOOK' },
-      { num: '02', label: 'Validate HMAC token signature', actionTag: 'AUTH_HMAC' },
-      { num: '03', label: 'Query internal ERP database', actionTag: 'QUERY_DB' },
-      { num: '04', label: 'Transform payload schema graph', actionTag: 'MAP_SCHEMA' },
-      { num: '05', label: 'Trigger enterprise SAP sync', actionTag: 'DISPATCH_API' },
-      { num: '06', label: 'Emit verified audit trace log', actionTag: 'WRITE_AUDIT' },
+      { num: '01', label: 'Ingest agent tool request via MCP', actionTag: 'MCP_INGEST' },
+      { num: '02', label: 'Validate principal & bearer token', actionTag: 'AUTH_VERIFY' },
+      { num: '03', label: 'Evaluate enterprise Cedar schema', actionTag: 'POLICY_CEDAR' },
+      { num: '04', label: 'Classify HIPAA / GDPR data access', actionTag: 'COMPLIANCE_SCAN' },
+      { num: '05', label: 'Score anomalous volume spike risk', actionTag: 'RISK_ENGINE' },
+      { num: '06', label: 'Emit signed tamper-proof audit trace', actionTag: 'AUDIT_RECORD' },
     ],
   },
   {
     id: 'multiagent',
     title: 'Multiagent Orchestration',
-    headline: 'Swarm Orchestrator',
+    headline: 'Swarm Authorization Mesh',
     description:
-      'Shared procedural memory across agent swarms. One agent learns the sequence, all agents execute it.',
+      'Zero-trust authorization across agent swarms. Ensures worker agents inherit strict boundaries and cannot escalate privileges.',
     icon: Network,
-    badge: 'SWARM_CONSENSUS',
-    previewUrl: 'Swarm Mesh / 6 Active Nodes',
+    badge: 'ZERO_TRUST_SWARM',
+    previewUrl: 'mesh://agentguard-cluster/swarm',
     previewType: 'swarm',
     steps: [
-      { num: '01', label: 'Leader decomposes high-level goal', actionTag: 'DECOMPOSE_TASK' },
-      { num: '02', label: 'Assign sub-routine to Worker #1', actionTag: 'DELEGATE_WORKER' },
-      { num: '03', label: 'Worker #2 queries vector index', actionTag: 'QUERY_MEMORY' },
-      { num: '04', label: 'Synchronize shared memory state', actionTag: 'SYNC_STATE' },
-      { num: '05', label: 'Aggregate multi-agent output', actionTag: 'MERGE_RESULTS' },
-      { num: '06', label: 'Broadcast consensus complete', actionTag: 'EMIT_CONSENSUS' },
+      { num: '01', label: 'Intercept sub-agent task delegation', actionTag: 'INTERCEPT_MESH' },
+      { num: '02', label: 'Verify delegated scope boundary', actionTag: 'DELEGATION_AUTH' },
+      { num: '03', label: 'Enforce least-privilege policy scope', actionTag: 'BOUNDARY_LOCK' },
+      { num: '04', label: 'Block lateral privilege escalation', actionTag: 'BLOCK_ESCALATION' },
+      { num: '05', label: 'Evaluate tool call from Worker #2', actionTag: 'CEDAR_EVAL' },
+      { num: '06', label: 'Record distributed swarm trace proof', actionTag: 'LEDGER_LOG' },
     ],
   },
 ];
@@ -279,11 +279,11 @@ export function AgentTypesSection() {
                 className="text-[38px] sm:text-[48px] lg:text-[54px] font-normal tracking-[-0.03em] text-white leading-[1.08] mb-4"
                 style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
               >
-                One Memory For<br />
+                One Security Layer For<br />
                 Every Agent Type
               </h2>
               <p className="text-[#888891] text-[15px] sm:text-[16px] leading-relaxed font-normal max-w-[460px]">
-                For anyone running agents that do the same work more than once.
+                Runtime protection, Cedar authorization, and threat prevention across every AI harness.
               </p>
             </div>
 
@@ -435,7 +435,7 @@ export function AgentTypesSection() {
                     <div className="flex items-center gap-2 mb-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b] animate-pulse" />
                       <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#f59e0b] font-semibold">
-                        AGENT LIFECYCLE
+                        AGENT SECURITY GATEWAY
                       </span>
                     </div>
                     <h3 className="text-lg sm:text-xl font-normal text-white tracking-tight">
@@ -528,7 +528,7 @@ export function AgentTypesSection() {
                       </div>
                       <div className="text-[9.5px] font-mono text-[#f59e0b]/90 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b] animate-ping" />
-                        Executing procedure...
+                        Evaluating security policy...
                       </div>
                     </div>
                   </div>

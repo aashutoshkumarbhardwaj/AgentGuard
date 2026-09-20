@@ -26,7 +26,7 @@ interface CaseStudyCardData {
 const CASE_STUDIES: CaseStudyCardData[] = [
   {
     id: 'openhome',
-    verticalLabel: 'OPENHOME',
+    verticalLabel: 'ENTERPRISE AI',
     colors: [
       [245, 158, 11], // Warm Amber
       [234, 88, 12],  // Sunset Orange
@@ -43,9 +43,9 @@ const CASE_STUDIES: CaseStudyCardData[] = [
   },
   {
     id: 'gstack',
-    kicker: 'GSTACK',
-    title: '98% less context per prompt',
-    copy: 'The learned procedure is 293 tokens against 15,593 for the /investigate skill, on Claude Code with gbrain memory.',
+    kicker: 'AUTONOMOUS LABS',
+    title: 'Zero data exfiltrations',
+    copy: 'Cedar authorization and PII masking evaluated 18,500 tool calls on Claude Code. 100% of sensitive queries sanitized before dispatch.',
     colors: [
       [168, 85, 247], // Deep Purple
       [232, 121, 249], // Glowing Violet
@@ -61,9 +61,9 @@ const CASE_STUDIES: CaseStudyCardData[] = [
   },
   {
     id: 'quartermaster',
-    kicker: 'QUARTERMASTER',
-    title: '40% fewer tool calls',
-    copy: '5 to 3 tool calls on the same tasks. Pass rate 91% with memory, 80% without.',
+    kicker: 'FINTECH LOGISTICS',
+    title: '<3.8ms policy evaluation',
+    copy: 'Over 250,000 tool actions verified with sub-5ms latency. High-blast operations routed to human approval without breaking agent flow.',
     colors: [
       [56, 189, 248], // Sky Blue
       [14, 165, 233], // Electric Cyan

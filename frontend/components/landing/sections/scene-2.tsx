@@ -19,8 +19,8 @@ export function Scene2() {
     <div className="scene2-root">
       {/* Left column */}
       <div className="scene2-left">
-        <h2 className="scene2-heading" style={{ fontFamily: 'Memorable, sans-serif' }}>
-          Agents That Get Better<br />With Every Run.
+        <h2 className="scene2-heading" style={{ fontFamily: 'Memorable, sans-serif', fontWeight: 700 }}>
+          AI Agents<br />Get Security<br />Before Every<br />Action.
         </h2>
         <p className="scene2-subtext">Watch the launch film.</p>
         <Link href="/mcp" className="scene2-dashboard-btn">

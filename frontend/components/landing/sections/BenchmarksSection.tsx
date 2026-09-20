@@ -206,13 +206,13 @@ export function BenchmarksSection() {
         {/* Benchmark Cards Overlay */}
         <div className="landing-benchmarks-cards relative z-10 w-full h-full flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 p-6 md:p-12 pointer-events-none">
           
-          {/* Card 1: GBrain, Claude Code */}
+          {/* Card 1: Claude 3.5, MCP Gateway */}
           <div className="landing-benchmark-card pointer-events-auto group/card w-full max-w-[440px] p-7 rounded-2xl bg-[#090d16]/85 backdrop-blur-xl border border-white/[0.1] hover:border-sky-400/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(0,0,0,0.8)] flex flex-col justify-between min-h-[300px]">
             <div className="landing-benchmark-header flex justify-between items-start">
               <div className="landing-benchmark-title-group">
-                <h4 className="text-[17px] font-medium text-white tracking-tight">GBrain, Claude Code</h4>
+                <h4 className="text-[17px] font-medium text-white tracking-tight">Claude 3.5, MCP Gateway</h4>
                 <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest mt-1">
-                  TURNS PER TASK, 3-BUG CODING FIXTURE
+                  UNGUARDED TOOL ACTIONS, 16-TOOL FIXTURE
                 </p>
                 <div className="landing-benchmark-dots flex gap-1 mt-2.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-white active" />
@@ -235,7 +235,7 @@ export function BenchmarksSection() {
             <div className="landing-benchmark-bars space-y-4 my-6">
               <div className="landing-benchmark-bar-row">
                 <div className="landing-benchmark-bar-labels flex justify-between text-[11px] font-mono text-zinc-400 mb-1.5">
-                  <span className="label">Without memory</span>
+                  <span className="label">Without AgentGuard</span>
                   <span className="value">16</span>
                 </div>
                 <div className="landing-benchmark-bar-track relative w-full h-1 bg-white/10 rounded-full overflow-hidden">
@@ -245,7 +245,7 @@ export function BenchmarksSection() {
 
               <div className="landing-benchmark-bar-row">
                 <div className="landing-benchmark-bar-labels flex justify-between text-[11px] font-mono text-white mb-1.5">
-                  <span className="label font-medium text-white">With Memorable</span>
+                  <span className="label font-medium text-white">With AgentGuard</span>
                   <span className="value font-medium text-white">13</span>
                 </div>
                 <div className="landing-benchmark-bar-track relative w-full h-1 bg-white/10 rounded-full overflow-hidden flex">
@@ -262,17 +262,17 @@ export function BenchmarksSection() {
             </div>
 
             <p className="landing-benchmark-footer-text text-[11px] font-mono text-zinc-500">
-              454 runs, every one passed.
+              454 security evaluation runs, zero policy bypasses.
             </p>
           </div>
 
-          {/* Card 2: Quartermaster, Codex */}
+          {/* Card 2: DevOps Agent, Codex */}
           <div className="landing-benchmark-card pointer-events-auto group/card w-full max-w-[440px] p-7 rounded-2xl bg-[#090d16]/85 backdrop-blur-xl border border-white/[0.1] hover:border-sky-400/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(0,0,0,0.8)] flex flex-col justify-between min-h-[300px]">
             <div className="landing-benchmark-header flex justify-between items-start">
               <div className="landing-benchmark-title-group">
-                <h4 className="text-[17px] font-medium text-white tracking-tight">Quartermaster, Codex</h4>
+                <h4 className="text-[17px] font-medium text-white tracking-tight">DevOps Agent, Codex</h4>
                 <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest mt-1">
-                  TOOL CALLS PER TASK, SAME FIXTURE
+                  UNVERIFIED ACTIONS PER TASK, SAME FIXTURE
                 </p>
                 <div className="landing-benchmark-dots flex gap-1 mt-2.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-white active" />
@@ -289,7 +289,7 @@ export function BenchmarksSection() {
             <div className="landing-benchmark-bars space-y-4 my-6">
               <div className="landing-benchmark-bar-row">
                 <div className="landing-benchmark-bar-labels flex justify-between text-[11px] font-mono text-zinc-400 mb-1.5">
-                  <span className="label">Without memory</span>
+                  <span className="label">Without AgentGuard</span>
                   <span className="value">5</span>
                 </div>
                 <div className="landing-benchmark-bar-track relative w-full h-1 bg-white/10 rounded-full overflow-hidden">
@@ -299,7 +299,7 @@ export function BenchmarksSection() {
 
               <div className="landing-benchmark-bar-row">
                 <div className="landing-benchmark-bar-labels flex justify-between text-[11px] font-mono text-white mb-1.5">
-                  <span className="label font-medium text-white">With Memorable</span>
+                  <span className="label font-medium text-white">With AgentGuard</span>
                   <span className="value font-medium text-white">3</span>
                 </div>
                 <div className="landing-benchmark-bar-track relative w-full h-1 bg-white/10 rounded-full overflow-hidden flex">
@@ -316,7 +316,7 @@ export function BenchmarksSection() {
             </div>
 
             <p className="landing-benchmark-footer-text text-[11px] font-mono text-zinc-500">
-              Three replications, same result each time.
+              Deterministic Cedar authorization, verified across every run.
             </p>
           </div>
 

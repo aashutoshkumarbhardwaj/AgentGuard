@@ -2347,11 +2347,11 @@ body::-webkit-scrollbar,
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 18px;
-  padding: 40px 42px;
-  background: #090a0f;
+  border-radius: 20px;
+  padding: 42px 42px;
+  background: #08090e;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.95);
+  box-shadow: 0 35px 80px -15px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2359,6 +2359,10 @@ body::-webkit-scrollbar,
   backface-visibility: hidden;
   will-change: transform, opacity;
   transform-origin: center center;
+}
+
+.memorable-stack-card.card-foreground {
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .memorable-card-border-glow {
@@ -2423,7 +2427,15 @@ body::-webkit-scrollbar,
   color: rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.memorable-step-dot:hover {
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .memorable-step-dot.active {
