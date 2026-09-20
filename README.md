@@ -54,7 +54,43 @@ flowchart LR
     
     D -->|ALLOW| E[Execute Tool]
     D -->|APPROVE| M[Human-in-the-Loop]
-    D -->|BLOCK| B[Reject Action]
+```
+
+### MCP Gateway Architecture
+
+AgentGuard serves as the universal security proxy between any MCP client and any MCP server:
+
+```
+ANY MCP CLIENT / AI AGENT
+          │
+          ▼
+   AgentGuard MCP Gateway
+          │
+          ├── Discover MCP tools
+          ├── Intercept tool calls
+          ├── Normalize request
+          ├── Cedar authorization
+          ├── Risk analysis
+          ├── Prompt-injection detection
+          ├── Sensitive-data detection
+          ├── Context analysis
+          ├── Bedrock Guardrail
+          │
+          ▼
+    ALLOW / APPROVE / BLOCK
+          │
+          ▼
+      ANY MCP SERVER
+          │
+          ├── GitHub
+          ├── Slack
+          ├── Google Drive
+          ├── Gmail
+          ├── Notion
+          ├── databases
+          ├── filesystem
+          ├── browser
+          └── any other MCP tool
 ```
 
 ## AWS Production Architecture & Bedrock Guardrails

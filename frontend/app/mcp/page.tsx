@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { McpSecurityGraph } from '@/components/mcp/security-graph';
 import { ProtectedTools } from '@/components/mcp/protected-tools';
+import { GatewayArchitecture } from '@/components/mcp/gateway-architecture';
 import { LiquidBentoCard } from '@/components/mcp/liquid-bento-card';
 import { CardSpotlight } from '@/components/ui/card-spotlight';
 import BentoGridDemo from '@/components/bento-grid-demo';
@@ -272,7 +273,12 @@ export default function McpPage() {
             </div>
 
             {/* --------------------------------------------------------------------- */}
-            {/* Bento Row 4: Footer Strip                                             */}
+            {/* Bento Row 4: Complete End-to-End Gateway Architecture Diagram         */}
+            {/* --------------------------------------------------------------------- */}
+            <GatewayArchitecture />
+
+            {/* --------------------------------------------------------------------- */}
+            {/* Bento Row 5: Footer Strip                                             */}
             {/* --------------------------------------------------------------------- */}
             <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-[#0a0c10]/95 border border-white/[0.08] backdrop-blur-md">
               <div className="flex items-center gap-2 text-[12.5px] text-zinc-400 font-normal">
