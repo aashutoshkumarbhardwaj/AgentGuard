@@ -19,28 +19,28 @@ const SIDEBAR_NAV: SidebarSection[] = [
     heading: 'GETTING STARTED',
     items: [
       { title: 'Overview', href: '#overview' },
+      { title: 'Features', href: '#features' },
       { title: 'Quickstart', href: '#quickstart' },
-      { title: 'AGENTS.md', href: '#for-agents' },
+      { title: 'Agent Extensions', href: '#for-agents' },
     ],
   },
   {
-    heading: 'CLI',
+    heading: 'PERFORMANCE',
     items: [
-      { title: 'Command reference', href: '#quickstart', hasChevron: true },
+      { title: 'Measured Benchmarks', href: '#measured' },
     ],
   },
   {
     heading: 'API',
     items: [
-      { title: 'Extraction API', href: '#extraction-api', hasChevron: true },
+      { title: 'Authorization API', href: '#extraction-api', hasChevron: true },
     ],
   },
   {
     heading: 'INTEGRATIONS',
     items: [
-      { title: 'Any harness', href: '#features' },
-      { title: 'gbrain', href: '#quickstart' },
-      { title: 'QM', href: '#features' },
+      { title: 'Python SDK', href: '#quickstart' },
+      { title: 'MCP Gateway', href: '/mcp' },
     ],
   },
 ];

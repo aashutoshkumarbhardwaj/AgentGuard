@@ -173,7 +173,7 @@ export function Sidebar() {
       >
         {/* Top: Logo & Collapse Pin */}
         <div className="flex h-16 items-center justify-between border-b border-white/[0.08] px-4">
-          <Link href="/overview" className="flex items-center gap-3 min-w-0">
+          <Link href="/" className="flex items-center gap-3 min-w-0" title="Back to landing page">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10 shadow-[0_0_15px_rgba(56,189,248,0.15)]">
               <Shield className="h-4.5 w-4.5 text-sky-400" strokeWidth={2.2} />
             </div>
@@ -311,12 +311,12 @@ export function Sidebar() {
               >
                 <div>
                   <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.08]">
-                    <div className="flex items-center gap-2.5">
+                    <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-2.5" title="Back to landing page">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/10">
                         <Shield className="h-4.5 w-4.5 text-sky-400" strokeWidth={2.2} />
                       </div>
                       <span className="font-bold text-white text-[16px] tracking-tight">AgentGuard</span>
-                    </div>
+                    </Link>
                     <button
                       onClick={() => setOpen(false)}
                       className="text-white/50 hover:text-white p-1 text-sm"

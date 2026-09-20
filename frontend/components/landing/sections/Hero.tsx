@@ -63,7 +63,7 @@ export function Hero() {
             Secure AI Agents<br />Before They Act.
           </h1>
           <div className="landing-hero-actions">
-            <Link href="/mcp" className="landing-solid-button">
+            <Link href="/overview" prefetch={true} className="landing-solid-button">
               DASHBOARD <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
             <div className="landing-code-chip">

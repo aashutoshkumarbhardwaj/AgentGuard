@@ -117,14 +117,13 @@ export function CinematicIntro() {
           ease: 'power2.in'
         }, 0.3); // Fade out WebGL as Scene 2 takes over
         
-        // Scene 2 Arrival staggered animation
-        tl.from('.landing-flow-node', {
-          y: 20,
+        // Scene 2 Arrival animation for heading
+        tl.from('.scene2-heading', {
+          y: 28,
           opacity: 0,
-          stagger: 0.1,
+          duration: 0.6,
           ease: 'power2.out',
-          duration: 0.5
-        }, 0.8);
+        }, 0.2);
       }
 
       ScrollTrigger.refresh();

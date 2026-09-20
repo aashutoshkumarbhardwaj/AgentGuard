@@ -16,16 +16,15 @@ export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [clickedNav, setClickedNav] = useState<string | null>(null);
-
-  let activeNav = 'USE-CASE';
-  if (pathname.startsWith('/docs')) {
-    activeNav = 'DOCS';
-  } else if (pathname.startsWith('/usecase') || pathname.startsWith('/use-case')) {
-    activeNav = 'USE-CASE';
-  }
+  const [selectedNav, setSelectedNav] = useState<string | null>(() => {
+    if (pathname?.startsWith('/docs')) return 'DOCS';
+    if (pathname?.startsWith('/usecase') || pathname?.startsWith('/use-case')) return 'USE-CASE';
+    return null;
+  });
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, label: string, href: string) => {
     setClickedNav(label);
+    setSelectedNav(label);
     setTimeout(() => setClickedNav(null), 400);
 
     if (href.startsWith('/#') && pathname === '/') {
@@ -44,7 +43,7 @@ export function Header() {
         <Logo />
         <nav className="hidden items-center gap-6 md:flex" aria-label="Marketing navigation">
           {NAV_ITEMS.map((item) => {
-            const isActive = activeNav === item.label;
+            const isActive = selectedNav === item.label;
             const isClicked = clickedNav === item.label;
             return (
               <a
@@ -64,7 +63,7 @@ export function Header() {
         </nav>
         <div className="hidden items-center gap-4 md:flex">
           <a href="mailto:hello@agentguard.dev" className="landing-outline-button">BOOK A CALL</a>
-          <Link href="/mcp" className="landing-solid-button">
+          <Link href="/overview" prefetch={true} className="landing-solid-button">
             DASHBOARD <ChevronRight className="h-3.5 w-3.5 ml-1" />
           </Link>
         </div>
@@ -79,7 +78,7 @@ export function Header() {
         {open && (
           <div className="absolute left-0 right-0 top-[60px] z-40 rounded-xl border border-white/10 bg-[#0a0a0d]/95 p-3 shadow-2xl backdrop-blur-xl md:hidden">
             {NAV_ITEMS.map((item) => {
-              const isActive = activeNav === item.label;
+              const isActive = selectedNav === item.label;
               return (
                 <a
                   key={`mob-${item.label}`}
@@ -99,7 +98,7 @@ export function Header() {
               );
             })}
             <a href="mailto:hello@agentguard.dev" className="mt-2 block rounded-lg border border-white/10 text-center px-3 py-2.5 text-sm font-mono tracking-wider text-white">BOOK A CALL</a>
-            <Link href="/mcp" className="mt-2 flex items-center justify-center rounded-lg bg-white px-3 py-2.5 text-sm font-bold tracking-wider text-black">DASHBOARD</Link>
+            <Link href="/overview" prefetch={true} className="mt-2 flex items-center justify-center rounded-lg bg-white px-3 py-2.5 text-sm font-bold tracking-wider text-black">DASHBOARD</Link>
           </div>
         )}
       </header>

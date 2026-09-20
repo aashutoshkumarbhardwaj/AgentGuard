@@ -6,9 +6,9 @@ const TOC_ITEMS = [
   { id: 'overview', title: 'Overview' },
   { id: 'features', title: 'Features' },
   { id: 'quickstart', title: 'Quickstart' },
-  { id: 'for-agents', title: 'For agents' },
+  { id: 'for-agents', title: 'Agent Extensions' },
   { id: 'measured', title: 'Measured' },
-  { id: 'extraction-api', title: 'Extraction API' },
+  { id: 'extraction-api', title: 'Authorization API' },
 ];
 
 export function DocsTableOfContents() {

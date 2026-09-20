@@ -8,7 +8,7 @@ export function Scene1() {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText('npx memorable-cli@latest');
+    navigator.clipboard.writeText('pip install agentguard-shield');
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -37,18 +37,54 @@ export function Scene1() {
         </div>
 
         {/* Main heading */}
-        <h1 className="scene1-heading" style={{ fontFamily: 'Memorable, sans-serif', fontWeight: 700 }}>
-          Secure AI Agents<br />Before They Act.
+        <h1
+          className="scene1-heading"
+          style={{
+            fontSize: 'clamp(46px, 7vw, 84px)',
+            lineHeight: 1.02,
+            letterSpacing: '-0.03em',
+            marginTop: 'clamp(2.5rem, 5vh, 3.5rem)',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'Memorable', -apple-system, BlinkMacSystemFont, sans-serif",
+              fontWeight: 800,
+            }}
+            className="tracking-tight text-white block"
+          >
+            Secure AI Agents
+          </span>
+          <span
+            style={{
+              fontFamily: "'Memorable Serif', 'Playfair Display', Georgia, serif",
+              fontStyle: 'italic',
+              fontWeight: 400,
+              letterSpacing: '-0.015em',
+            }}
+            className="text-white/95 block my-0.5"
+          >
+            Before They
+          </span>
+          <span
+            style={{
+              fontFamily: "'Memorable', -apple-system, BlinkMacSystemFont, sans-serif",
+              fontWeight: 900,
+            }}
+            className="tracking-tight text-white block"
+          >
+            Act.
+          </span>
         </h1>
 
         {/* CTA row */}
         <div className="scene1-cta-row">
-          <Link href="/mcp" className="scene1-dashboard-btn">
+          <Link href="/overview" prefetch={true} className="scene1-dashboard-btn">
             DASHBOARD <ChevronRight className="h-3.5 w-3.5" />
           </Link>
 
           <button type="button" className="scene1-terminal-btn" onClick={handleCopy}>
-            <span className="scene1-terminal-prompt">npx memorable-cli@latest</span>
+            <span className="scene1-terminal-prompt">pip install agentguard-shield</span>
             <Copy className="h-3.5 w-3.5 scene1-copy-icon" />
             {copied && <span className="scene1-copied-label">Copied!</span>}
           </button>

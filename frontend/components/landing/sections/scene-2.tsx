@@ -23,7 +23,7 @@ export function Scene2() {
           AI Agents<br />Get Security<br />Before Every<br />Action.
         </h2>
         <p className="scene2-subtext">Watch the launch film.</p>
-        <Link href="/mcp" className="scene2-dashboard-btn">
+        <Link href="/overview" prefetch={true} className="scene2-dashboard-btn">
           DASHBOARD <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </div>

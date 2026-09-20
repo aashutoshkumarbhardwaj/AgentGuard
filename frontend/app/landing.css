@@ -1747,12 +1747,39 @@ body::-webkit-scrollbar,
 
 .scene2-heading {
   font-family: 'Memorable', sans-serif;
-  font-size: clamp(38px, 5.2vw, 68px);
+  font-size: clamp(44px, 5.8vw, 76px);
   font-weight: 700;
-  letter-spacing: -0.025em;
-  color: #fff;
-  line-height: 1.08;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
   margin: 0;
+  background: linear-gradient(
+    115deg,
+    #ffffff 0%,
+    #ffffff 38%,
+    #c4b5fd 48%,
+    #93c5fd 58%,
+    #ffffff 72%,
+    #ffffff 100%
+  );
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: scene2TextShimmer 5.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 24px rgba(168, 85, 247, 0.22));
+}
+
+@keyframes scene2TextShimmer {
+  0% {
+    background-position: 180% 0;
+  }
+  50% {
+    background-position: -40% 0;
+  }
+  100% {
+    background-position: -40% 0;
+  }
 }
 
 .scene2-subtext {
