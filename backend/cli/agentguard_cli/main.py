@@ -759,5 +759,153 @@ def audit():
         raise typer.Exit(1)
 
 
+@app.command()
+def reset(
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt"),
+):
+    """
+    Reset AgentGuard local runtime state.
+    Clears runtime requests, audit logs, pending approvals, and MCP configurations.
+    Preserves default registered agent schemas.
+    """
+    if not yes:
+        confirm = typer.confirm("Are you sure you want to reset all local runtime data (audit logs, approvals, and MCP servers)?")
+        if not confirm:
+            console.print("[yellow]Reset cancelled.[/yellow]")
+            return
+
+    repo_root = find_repo_root()
+    db_path = repo_root / "backend" / "agentguard.db"
+    mcp_config = repo_root / "backend" / "mcp_servers.json"
+
+    # 1. Reset MCP config to empty servers list
+    try:
+        mcp_config.write_text('{\n  "servers": []\n}\n', encoding="utf-8")
+    except Exception as exc:
+        console.print(f"[yellow]Warning: Could not reset mcp_servers.json: {exc}[/yellow]")
+
+    # 2. Reset database tables
+    try:
+        import sqlite3
+        if db_path.exists():
+            conn = sqlite3.connect(str(db_path))
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM audit_logs")
+            cursor.execute("DELETE FROM approvals")
+            conn.commit()
+            conn.close()
+
+        # Ensure base schemas are initialized cleanly
+        sys.path.insert(0, str(repo_root / "backend"))
+        from app.db.agents import init_db, seed_agents
+        from app.db.audit import init_audit_db
+        from app.core.approvals import init_approvals_db
+        init_db()
+        seed_agents()
+        init_audit_db()
+        init_approvals_db()
+    except Exception as exc:
+        console.print(f"[red]Failed to reset database:[/red] {exc}")
+        raise typer.Exit(1)
+
+    console.print(
+        Panel(
+            "[green]✓ AgentGuard local state reset successfully.[/green]\n\n"
+            "• MCP Servers: [bold]0[/bold]\n"
+            "• Runtime Requests: [bold]0[/bold]\n"
+            "• Pending Approvals: [bold]0[/bold]\n"
+            "• Audit Chain: [bold]Clean (GENESIS)[/bold]\n"
+            "• Agents: [bold]Standard Registered Schemas Ready[/bold]",
+            title="Local State Reset",
+        )
+    )
+
+
+@app.command()
+def demo():
+    """
+    Explicitly populate realistic demo data for presentations.
+    Note: Standard startup (agentguard start) is ALWAYS clean. Use this command
+    only when you explicitly want demo requests and approvals populated.
+    """
+    repo_root = find_repo_root()
+    sys.path.insert(0, str(repo_root / "backend"))
+    from app.core.audit import record_event
+    from app.core.approvals import create_approval
+
+    console.print("[cyan]Seeding explicit demo activity into local database...[/cyan]")
+
+    # 1. Sample allowed action
+    record_event(
+        agent_id="research-agent",
+        user_id="demo-user",
+        tool="calendar",
+        action="read",
+        decision="ALLOW",
+        risk_level="LOW",
+        risk_score=10,
+        policy_id="CALENDAR_READ_001",
+        reason="Calendar read allowed for scheduled sync",
+        factors=["Verified agent permissions"],
+    )
+
+    # 2. Sample pending approval
+    create_approval(
+        request_data={
+            "agent_id": "research-agent",
+            "user_id": "demo-user",
+            "tool": "email",
+            "action": "send",
+            "resource": "investor-update@external.com",
+            "context": {"destination": "external"},
+        },
+        decision={
+            "decision": "APPROVE",
+            "risk_level": "MEDIUM",
+            "risk_score": 65,
+            "policy_id": "EMAIL_SEND_001",
+            "reason": "Outbound email to external domain requires human verification.",
+            "factors": ["External destination", "Untrusted recipient domain"],
+        }
+    )
+    record_event(
+        agent_id="research-agent",
+        user_id="demo-user",
+        tool="email",
+        action="send",
+        decision="APPROVE",
+        risk_level="MEDIUM",
+        risk_score=65,
+        policy_id="EMAIL_SEND_001",
+        reason="Outbound email requires human verification.",
+        factors=["External destination"],
+    )
+
+    # 3. Sample blocked action
+    record_event(
+        agent_id="research-agent",
+        user_id="demo-user",
+        tool="file",
+        action="delete",
+        decision="BLOCK",
+        risk_level="CRITICAL",
+        risk_score=100,
+        policy_id="FILE_DELETE_001",
+        reason="File deletion prohibited by deterministic Cedar policy",
+        factors=["High-risk file destruction attempt"],
+    )
+
+    console.print(
+        Panel(
+            "[green]✓ Demo data seeded successfully.[/green]\n\n"
+            "• Demo Requests: [bold]3 evaluated (1 ALLOW, 1 APPROVE, 1 BLOCK)[/bold]\n"
+            "• Demo Approvals: [bold]1 pending human sign-off[/bold]\n\n"
+            "Open [bold]http://localhost:8787/app[/bold] to view the demo console.\n"
+            "To return to a clean state anytime, run: [bold]agentguard reset[/bold]",
+            title="Demo Data Seeded",
+        )
+    )
+
+
 if __name__ == "__main__":
     app()

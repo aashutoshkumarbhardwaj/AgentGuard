@@ -6,14 +6,8 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
-  Bot,
-  Activity,
   ShieldCheck,
-  AlertTriangle,
-  FileText,
-  Lock,
   ScrollText,
-  Swords,
   Network,
   Settings,
   Shield,
@@ -21,26 +15,21 @@ import {
   Star,
   Heart,
   PanelLeftClose,
+  FlaskConical,
 } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
 const navGroups = [
   {
-    label: 'Control Plane',
+    label: 'Local Console',
     items: [
       { label: 'Overview', href: '/app', icon: LayoutDashboard },
       { label: 'MCP Servers', href: '/app/mcp', icon: Network },
-      { label: 'Requests', href: '/app/requests', icon: Activity },
+      { label: 'Playground', href: '/app/playground', icon: FlaskConical },
       { label: 'Approvals', href: '/app/approvals', icon: ShieldCheck },
-    ],
-  },
-  {
-    label: 'Governance',
-    items: [
       { label: 'Audit', href: '/app/audit', icon: ScrollText },
-      { label: 'Policies', href: '/app/policies', icon: FileText },
-      { label: 'Agents', href: '/app/agents', icon: Bot },
+      { label: 'Settings', href: '/app/settings', icon: Settings },
     ],
   },
 ];
@@ -49,11 +38,9 @@ function isItemActive(href: string, currentPath: string): boolean {
   if (currentPath === href) return true;
   if (href === '/app' && (currentPath === '/app' || currentPath === '/overview')) return true;
   if (href === '/app/mcp' && (currentPath === '/app/mcp' || currentPath === '/mcp' || currentPath === '/app/tools')) return true;
-  if (href === '/app/requests' && (currentPath === '/app/requests' || currentPath === '/activity')) return true;
+  if (href === '/app/playground' && currentPath.startsWith('/app/playground')) return true;
   if (href === '/app/approvals' && (currentPath === '/app/approvals' || currentPath === '/approvals')) return true;
   if (href === '/app/audit' && (currentPath === '/app/audit' || currentPath === '/audit')) return true;
-  if (href === '/app/policies' && (currentPath === '/app/policies' || currentPath === '/policies' || currentPath === '/permissions')) return true;
-  if (href === '/app/agents' && (currentPath === '/app/agents' || currentPath === '/agents' || currentPath.startsWith('/agents/'))) return true;
   if (href === '/app/settings' && (currentPath === '/app/settings' || currentPath === '/settings')) return true;
   return false;
 }
@@ -246,27 +233,8 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* Bottom: Settings & GitHub with Card Spotlight Hover */}
+        {/* Bottom: GitHub with Card Spotlight Hover */}
         <div className="border-t border-white/[0.08] p-3 space-y-1 font-memorable">
-          <Link
-            href="/app/settings"
-            title={!open ? 'Settings' : undefined}
-            className={cn(
-              'group relative flex items-center rounded-xl text-[14.5px] font-medium text-white/60 hover:text-white hover:bg-sky-950/20 hover:border-sky-500/30 border border-transparent transition-all overflow-hidden',
-              open ? 'gap-3 px-3 py-2' : 'justify-center p-2.5'
-            )}
-          >
-            <Settings className="h-4.5 w-4.5 shrink-0 text-white/50 group-hover:text-sky-300 transition-colors" strokeWidth={1.9} />
-            {open && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="truncate tracking-tight"
-              >
-                Settings
-              </motion.span>
-            )}
-          </Link>
           <a
             href="https://github.com"
             target="_blank"
@@ -392,14 +360,6 @@ export function Sidebar() {
                     <Heart className="h-4.5 w-4.5 fill-rose-500/60 text-rose-400" />
                     <span>Sponsor Project</span>
                   </a>
-                  <Link
-                    href="/app/settings"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 text-[15px] text-white/60 hover:text-white"
-                  >
-                    <Settings className="h-4.5 w-4.5" />
-                    <span>Settings</span>
-                  </Link>
                 </div>
               </motion.div>
             </>

@@ -15,6 +15,7 @@ from app.api.authorize import router as authorize_router
 from app.api.agents import router as agents_router
 from app.api.mcp import router as mcp_router
 from app.api.policies import router as policies_router
+from app.api.decision import router as decision_router
 
 logger = logging.getLogger("agentguard.main")
 
@@ -85,6 +86,7 @@ app.include_router(agents_router)
 app.include_router(mcp_router)
 app.include_router(policies_router)
 app.include_router(policies_router, prefix="/v1")
+app.include_router(decision_router)
 
 # ── MCP Streamable HTTP gateway at /mcp ─────────────────────────────────────
 # The gateway is mounted as a sub-ASGI app.  It shares the UpstreamManager

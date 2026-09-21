@@ -3,11 +3,16 @@ __pycache__
 .git
 .pytest_cache
 node_modules
+.next
+out
 *.pyc
 *.pyo
 .idea/
 .vscode/
 agentguard.db
+release_venv/
+test_venv/
 sdk/python/build/
 sdk/python/dist/
 sdk/python/*.egg-info/
+

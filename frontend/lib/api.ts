@@ -247,6 +247,104 @@ export async function fetchServerTools(serverId: string): Promise<McpTool[]> {
   }
 }
 
+export interface DecisionEngineTelemetry {
+  decision: 'ALLOW' | 'APPROVE' | 'BLOCK';
+  probabilities: Record<string, number>;
+  confidence: number;
+  provider: string;
+  model?: string | null;
+  latency_ms?: number | null;
+  fallback_used: boolean;
+  fallback_chain?: string[];
+  hard_policy_enforced?: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface PlaygroundToolResult {
+  decision: 'ALLOW' | 'APPROVE' | 'BLOCK';
+  risk_score: number;
+  risk_level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  policy_id: string;
+  reason: string;
+  factors: string[];
+  status: 'EXECUTED' | 'PENDING_APPROVAL' | 'BLOCKED' | 'ERROR';
+  upstream_called: boolean;
+  approval_id?: string | null;
+  result?: any;
+  server_id: string;
+  tool_name: string;
+  decision_engine?: DecisionEngineTelemetry | null;
+  error?: string;
+}
+
+export async function executePlaygroundTool(
+  serverId: string,
+  toolName: string,
+  args: Record<string, any>,
+  agentId: string = 'research-agent'
+): Promise<PlaygroundToolResult> {
+  try {
+    const res = await fetch(
+      `${API_URL}/v1/mcp/servers/${encodeURIComponent(serverId)}/tools/${encodeURIComponent(toolName)}/call`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          arguments: args,
+          agent_id: agentId,
+        }),
+      }
+    );
+    const data = await res.json();
+    if (!res.ok) {
+      return {
+        decision: 'BLOCK',
+        risk_score: 100,
+        risk_level: 'CRITICAL',
+        policy_id: 'GATEWAY_ERROR',
+        reason: data.detail || 'Tool execution request failed',
+        factors: ['Gateway communication error'],
+        status: 'ERROR',
+        upstream_called: false,
+        server_id: serverId,
+        tool_name: toolName,
+        error: data.detail || 'Request failed',
+      };
+    }
+    return data;
+  } catch (err: any) {
+    return {
+      decision: 'BLOCK',
+      risk_score: 100,
+      risk_level: 'CRITICAL',
+      policy_id: 'NETWORK_ERROR',
+      reason: err.message || 'Network error connecting to AgentGuard gateway',
+      factors: ['Network failure'],
+      status: 'ERROR',
+      upstream_called: false,
+      server_id: serverId,
+      tool_name: toolName,
+      error: err.message || 'Network error',
+    };
+  }
+}
+
+export async function connectDemoMcp(): Promise<{ server?: McpServer; error?: string }> {
+  try {
+    const res = await fetch(`${API_URL}/v1/mcp/servers/demo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return { error: data.detail || 'Failed to connect Demo MCP' };
+    }
+    return { server: data.server };
+  } catch (err: any) {
+    return { error: err.message || 'Network error connecting to AgentGuard API' };
+  }
+}
+
 export async function fetchApprovals(): Promise<any[]> {
   try {
     const res = await fetch(`${API_URL}/approvals`, { cache: 'no-store' });
@@ -330,4 +428,85 @@ export async function fetchPolicies(): Promise<PolicyRecord[]> {
     return [];
   }
 }
+
+export interface DecisionStatusResponse {
+  enabled: boolean;
+  primary: {
+    name: string;
+    displayName: string;
+    model: string;
+    configured: boolean;
+    maskedKey?: string | null;
+    source?: string;
+  };
+  fallback: {
+    name: string;
+    displayName: string;
+    model: string;
+    configured: boolean;
+    maskedKey?: string | null;
+    endpoint: string;
+    source?: string;
+  };
+  failsafe: {
+    name: string;
+    displayName: string;
+    model: string;
+    configured: boolean;
+  };
+  allow_threshold: number;
+  block_threshold: number;
+}
+
+export async function fetchDecisionStatus(): Promise<DecisionStatusResponse | null> {
+  try {
+    const res = await fetch(`${API_URL}/v1/decision/status`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function updateDecisionKeys(payload: {
+  typesafe_api_key?: string | null;
+  openjev_api_key?: string | null;
+  openjev_base_url?: string | null;
+}): Promise<{ status: string; message: string; decision_status?: DecisionStatusResponse }> {
+  const res = await fetch(`${API_URL}/v1/decision/keys`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return await res.json();
+}
+
+export async function clearDecisionKey(
+  provider: 'typesafe' | 'openjev'
+): Promise<{ status: string; decision_status?: DecisionStatusResponse }> {
+  const res = await fetch(`${API_URL}/v1/decision/keys/${provider}`, {
+    method: 'DELETE',
+  });
+  return await res.json();
+}
+
+export async function evaluateDecisionTest(payload: {
+  tool: string;
+  action: string;
+  risk_score: number;
+  risk_level: string;
+}): Promise<DecisionEngineTelemetry | null> {
+  try {
+    const res = await fetch(`${API_URL}/v1/decision/evaluate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 

@@ -54,10 +54,24 @@ export function Hero() {
 
       <div className="landing-hero-layout-full">
         <div className="landing-hero-text">
-          <div className="landing-hero-eyebrow">
-            BACKED BY
-            <span className="landing-yc-badge">Y</span>
-            JUGAAD LABS INC.
+          <div className="scene1-top-row">
+            <div className="landing-hero-eyebrow">
+              BACKED BY
+              <span className="landing-yc-badge">Y</span>
+              JUGAAD LABS INC.
+            </div>
+            <div className="scene1-badge-divider" aria-hidden="true" />
+            <div className="scene1-jev-badge" title="India's First Jev Project — AI Agent Security & Runtime Governance">
+              <span className="scene1-tricolor-indicator" aria-hidden="true">
+                <span className="scene1-tri-saffron" />
+                <span className="scene1-tri-white" />
+                <span className="scene1-tri-green" />
+              </span>
+              <span className="scene1-jev-text">
+                <span className="scene1-jev-prefix">INDIA&apos;S FIRST</span>
+                <span className="scene1-jev-highlight">JEV PROJECT</span>
+              </span>
+            </div>
           </div>
           <h1 className="landing-hero-title" style={{ fontFamily: 'Memorable, sans-serif', fontWeight: 700 }}>
             Secure AI Agents<br />Before They Act.

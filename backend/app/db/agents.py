@@ -5,13 +5,16 @@ from pathlib import Path
 import os
 
 DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent.parent / "agentguard.db"
-DB_PATH = os.environ.get("AGENTGUARD_DB", str(DEFAULT_DB_PATH))
+
+
+def get_db_path() -> str:
+    return os.environ.get("AGENTGUARD_DB", str(DEFAULT_DB_PATH))
 
 
 def get_connection():
-    db_path_obj = Path(DB_PATH)
-    db_path_obj.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    db_path = get_db_path()
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -40,8 +43,49 @@ def init_db():
         )
     """)
 
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS system_config (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+    """)
+
     conn.commit()
     conn.close()
+
+
+def get_config_val(key: str, default: str | None = None) -> str | None:
+    try:
+        conn = get_connection()
+        row = conn.execute("SELECT value FROM system_config WHERE key = ?", (key,)).fetchone()
+        conn.close()
+        if row and row["value"]:
+            return row["value"]
+        return default
+    except Exception:
+        return default
+
+
+def set_config_val(key: str, value: str):
+    conn = get_connection()
+    conn.execute("""
+        INSERT INTO system_config (key, value, updated_at)
+        VALUES (?, ?, datetime('now'))
+        ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at
+    """, (key, value))
+    conn.commit()
+    conn.close()
+
+
+def delete_config_val(key: str):
+    try:
+        conn = get_connection()
+        conn.execute("DELETE FROM system_config WHERE key = ?", (key,))
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
 
 
 def seed_agents():

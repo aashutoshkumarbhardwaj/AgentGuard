@@ -162,11 +162,13 @@ export default function RequestsPage() {
         {filteredLogs.length === 0 ? (
           <div className="py-12 text-center text-zinc-500">
             <Activity className="h-8 w-8 mx-auto mb-2 opacity-40" />
-            <p className="text-sm font-semibold text-zinc-300">No requests found</p>
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-sm font-semibold text-zinc-200">
+              {logs.length === 0 ? 'No tool requests yet.' : 'No requests matched your filter'}
+            </p>
+            <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">
               {logs.length === 0
-                ? 'No tool call requests have been submitted to AgentGuard yet.'
-                : 'No requests matched your filter criteria.'}
+                ? 'Runtime requests will appear here when an agent invokes an MCP tool.'
+                : 'Try adjusting your search query or decision filter.'}
             </p>
           </div>
         ) : (

@@ -25,7 +25,8 @@ def record_event(
     policy_id: str,
     reason: str,
     factors: list,
-    bedrock: dict = None
+    bedrock: dict = None,
+    decision_engine: dict = None
 ):
     last_event = get_last_audit_log()
     previous_hash = (
@@ -47,6 +48,9 @@ def record_event(
         "reason": reason,
         "factors": factors,
     }
+
+    if decision_engine is not None:
+        event["decision_engine"] = decision_engine
 
     if bedrock is not None:
         event["bedrock"] = {

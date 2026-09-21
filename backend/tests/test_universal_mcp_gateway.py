@@ -378,7 +378,7 @@ async def test_13_actual_mcp_client_stdio_session():
                 "id": "mock",
                 "name": "Mock Upstream MCP Server",
                 "transport": "stdio",
-                "command": ".venv/bin/python",
+                "command": sys.executable,
                 "args": ["-m", "tests.mock_upstream_mcp"],
                 "env": {}
             }
@@ -394,9 +394,11 @@ async def test_13_actual_mcp_client_stdio_session():
     try:
         test_env = dict(os.environ)
         test_env["MCP_CONFIG_PATH"] = tmp_path
+        backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        test_env["PYTHONPATH"] = f"{backend_dir}:{test_env.get('PYTHONPATH', '')}"
 
         server_params = StdioServerParameters(
-            command=".venv/bin/python",
+            command=sys.executable,
             args=["-m", "app.mcp.mcp_server"],
             env=test_env,
         )

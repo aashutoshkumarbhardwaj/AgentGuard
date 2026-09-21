@@ -18,6 +18,7 @@ def init_audit_db():
             reason TEXT NOT NULL,
             factors TEXT NOT NULL,
             bedrock TEXT,
+            decision_engine TEXT,
             previous_hash TEXT NOT NULL,
             event_hash TEXT NOT NULL
         )
@@ -27,6 +28,8 @@ def init_audit_db():
     columns = [col[1] for col in cursor.fetchall()]
     if "bedrock" not in columns:
         conn.execute("ALTER TABLE audit_logs ADD COLUMN bedrock TEXT")
+    if "decision_engine" not in columns:
+        conn.execute("ALTER TABLE audit_logs ADD COLUMN decision_engine TEXT")
     conn.commit()
     conn.close()
 
@@ -34,12 +37,13 @@ def insert_audit_log(event: dict) -> dict:
     conn = get_connection()
     cursor = conn.cursor()
     bedrock_data = json.dumps(event["bedrock"]) if "bedrock" in event and event["bedrock"] is not None else None
+    decision_engine_data = json.dumps(event["decision_engine"]) if "decision_engine" in event and event["decision_engine"] is not None else None
     cursor.execute("""
         INSERT INTO audit_logs (
             timestamp, agent_id, user_id, tool, action, decision,
             risk_level, risk_score, policy_id, reason, factors,
-            bedrock, previous_hash, event_hash
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            bedrock, decision_engine, previous_hash, event_hash
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         event["timestamp"],
         event["agent_id"],
@@ -53,6 +57,7 @@ def insert_audit_log(event: dict) -> dict:
         event["reason"],
         json.dumps(event["factors"]),
         bedrock_data,
+        decision_engine_data,
         event["previous_hash"],
         event["event_hash"]
     ))
@@ -91,6 +96,11 @@ def get_all_audit_logs() -> list:
                 item["bedrock"] = json.loads(row["bedrock"])
             except Exception:
                 pass
+        if "decision_engine" in row_keys and row["decision_engine"]:
+            try:
+                item["decision_engine"] = json.loads(row["decision_engine"])
+            except Exception:
+                pass
         item["previous_hash"] = row["previous_hash"]
         item["event_hash"] = row["event_hash"]
         result.append(item)
@@ -122,6 +132,11 @@ def get_last_audit_log() -> dict:
     if "bedrock" in row_keys and row["bedrock"]:
         try:
             item["bedrock"] = json.loads(row["bedrock"])
+        except Exception:
+            pass
+    if "decision_engine" in row_keys and row["decision_engine"]:
+        try:
+            item["decision_engine"] = json.loads(row["decision_engine"])
         except Exception:
             pass
     item["previous_hash"] = row["previous_hash"]

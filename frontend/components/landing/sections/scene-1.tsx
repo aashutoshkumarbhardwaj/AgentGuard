@@ -29,11 +29,29 @@ export function Scene1() {
 
       {/* Content: bottom-left aligned */}
       <div className="scene1-content">
-        {/* Y Combinator badge */}
-        <div className="scene1-yc-badge">
-          <span className="scene1-yc-backed">BACKED BY</span>
-          <span className="scene1-yc-logo">Y</span>
-          <span className="scene1-yc-name">JUGAAD LABS INC.</span>
+        {/* Top Badges Row */}
+        <div className="scene1-top-row">
+          {/* Y Combinator badge */}
+          <div className="scene1-yc-badge">
+            <span className="scene1-yc-backed">BACKED BY</span>
+            <span className="scene1-yc-logo">Y</span>
+            <span className="scene1-yc-name">JUGAAD LABS INC.</span>
+          </div>
+
+          <div className="scene1-badge-divider" aria-hidden="true" />
+
+          {/* India's First Jev Project */}
+          <div className="scene1-jev-badge" title="India's First Jev Project — AI Agent Security & Runtime Governance">
+            <span className="scene1-tricolor-indicator" aria-hidden="true">
+              <span className="scene1-tri-saffron" />
+              <span className="scene1-tri-white" />
+              <span className="scene1-tri-green" />
+            </span>
+            <span className="scene1-jev-text">
+              <span className="scene1-jev-prefix">INDIA&apos;S FIRST</span>
+              <span className="scene1-jev-highlight">JEV PROJECT</span>
+            </span>
+          </div>
         </div>
 
         {/* Main heading */}

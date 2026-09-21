@@ -4,17 +4,54 @@ services:
   agentguard-api:
     build:
       context: ./backend
+      dockerfile: Dockerfile
+    image: agentguard-backend:latest
+    container_name: agentguard-backend
+    restart: unless-stopped
     ports:
-      - "8000:8000"   # REST API  →  /v1/authorize, /health, /audit
-                      # MCP HTTP  →  /mcp  (Streamable HTTP, same process)
+      - "8000:8000"   # REST API & Universal MCP Gateway (/mcp, /health, /audit)
     environment:
       - AGENTGUARD_DB=/data/agentguard.db
       - AGENTGUARD_LOG_LEVEL=INFO
-      - AGENTGUARD_ENV=development
-      # Point to the mcp_servers.json mounted from /data (override at runtime)
+      - AGENTGUARD_ENV=production
       - MCP_CONFIG_PATH=/data/mcp_servers.json
+      - AGENTGUARD_ALLOWED_ORIGINS=http://localhost:8787,http://localhost:3000,http://127.0.0.1:8787,http://127.0.0.1:3000
     volumes:
       - agentguard_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - agentguard-net
+
+  agentguard-dashboard:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    image: agentguard-frontend:latest
+    container_name: agentguard-frontend
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - PORT=8787
+      - HOSTNAME=0.0.0.0
+    depends_on:
+      agentguard-api:
+        condition: service_healthy
+    networks:
+      - agentguard-net
 
 volumes:
   agentguard_data:
+    driver: local
+
+networks:
+  agentguard-net:
+    driver: bridge
