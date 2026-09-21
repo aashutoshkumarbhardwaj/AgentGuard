@@ -5,6 +5,12 @@
 AgentGuard is a universal, local-first runtime security and authorization control plane for AI agents and Model Context Protocol (MCP) tool calls. It acts as an independent security gateway between any AI agent/client and any upstream MCP tool server, evaluating requests against deterministic authorization policies, threat detectors, risk heuristics, and sensitive data classifiers before allowing execution.
 
 ---
+## 💖 Support This Project
+
+If you find this project helpful, please consider sponsoring me on GitHub:
+
+[![Sponsor](https://img.shields.io/badge/-Sponsor-fafbfc?logo=GitHub%20Sponsors&style=for-the-badge)](https://github.com/sponsors/aashutoshkumarbhardwaj)
+
 
 ## ⚡ Quickstart (Local-First in 30 Seconds)
 
