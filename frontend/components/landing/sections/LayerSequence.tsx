@@ -213,7 +213,7 @@ export function LayerSequence() {
 
             {/* Section Heading (Larger & with Memorable Font) */}
             <h2
-              className="text-[42px] sm:text-[54px] lg:text-[62px] xl:text-[70px] font-normal tracking-[-0.035em] text-white leading-[1.05] mb-6"
+              className="text-[30px] sm:text-[54px] lg:text-[62px] xl:text-[70px] font-normal tracking-[-0.035em] text-white leading-[1.08] mb-6"
               style={{ fontFamily: 'Memorable, sans-serif' }}
             >
               Security That Follows<br /> The Shape Of The Work.

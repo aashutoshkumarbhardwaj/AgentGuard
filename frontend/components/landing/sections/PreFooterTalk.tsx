@@ -448,7 +448,7 @@ export function PreFooterTalk() {
 
             {/* Main Title */}
             <h2
-              className="text-[42px] sm:text-[52px] md:text-[62px] lg:text-[66px] font-normal tracking-[-0.03em] text-white leading-[1.1] mb-7 sm:mb-8 select-none"
+              className="text-[28px] sm:text-[52px] md:text-[62px] lg:text-[66px] font-normal tracking-[-0.03em] text-white leading-[1.12] mb-6 sm:mb-8 select-none"
               style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
             >
               Let&apos;s Build Something<br />Memorable
